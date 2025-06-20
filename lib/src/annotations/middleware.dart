@@ -1,0 +1,3 @@
+class Middleware {
+  const Middleware();
+}
