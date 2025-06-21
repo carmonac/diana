@@ -1,0 +1,8 @@
+builders:
+  diana_builder:
+    import: "package:diana/builder.dart"
+    builder_factories: ["dianaBuilder"]
+    build_extensions: { r"$lib$": ["generated/diana_app.g.dart"] }
+    auto_apply: dependents
+    build_to: source
+    required_inputs: [".dart"]
