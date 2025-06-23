@@ -1,0 +1,50 @@
+import 'package:shelf/shelf.dart' as shelf;
+
+/// Diana framework HTTP request abstraction
+class DianaRequest {
+  final shelf.Request _shelfRequest;
+
+  DianaRequest._(this._shelfRequest);
+
+  /// Factory constructor from Shelf request
+  factory DianaRequest.fromShelf(shelf.Request request) =>
+      DianaRequest._(request);
+
+  /// HTTP method (GET, POST, etc.)
+  String get method => _shelfRequest.method;
+
+  /// Request URI
+  Uri get uri => _shelfRequest.requestedUri;
+
+  /// Request headers
+  Map<String, String> get headers => _shelfRequest.headers;
+
+  /// Request context for storing custom data
+  Map<String, Object?> get context => _shelfRequest.context;
+
+  /// Query parameters
+  Map<String, String> get queryParameters => _shelfRequest.url.queryParameters;
+
+  /// Read body as string
+  Future<String> readAsString() => _shelfRequest.readAsString();
+
+  /// Get a specific header
+  String? header(String name) => _shelfRequest.headers[name.toLowerCase()];
+
+  /// Get context value
+  T? getContext<T>(String key) => _shelfRequest.context[key] as T?;
+
+  /// Create a copy with modified context
+  DianaRequest copyWith({Map<String, Object?>? context}) {
+    return DianaRequest._(
+      _shelfRequest.change(
+        context: context != null
+            ? {..._shelfRequest.context, ...context}
+            : null,
+      ),
+    );
+  }
+
+  /// Internal shelf request (for framework internal use only)
+  shelf.Request get shelfRequest => _shelfRequest;
+}
