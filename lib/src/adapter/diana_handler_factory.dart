@@ -1,3 +1,4 @@
+import 'package:diana/src/core/base/base.dart';
 import 'package:shelf/shelf.dart';
 import 'request.dart';
 import 'middleware_factory.dart';
@@ -22,23 +23,17 @@ class DianaHandlerFactory {
   }
 
   /// Creates a guard middleware
-  static Middleware createGuard(
-    Future<DianaRequest> Function(DianaRequest) handler,
-  ) {
-    return MiddlewareFactory.createGuard(handler);
+  static Middleware createGuard(DianaGuard guard) {
+    return MiddlewareFactory.createGuard(guard);
   }
 
   /// Creates a Diana middleware
-  static Middleware createMiddleware(
-    Future<DianaRequest> Function(DianaRequest) middlewareUseMethod,
-  ) {
-    return MiddlewareFactory.createMiddleware(middlewareUseMethod);
+  static Middleware createMiddleware(DianaMiddleware middleware) {
+    return MiddlewareFactory.createMiddleware(middleware);
   }
 
   /// Creates an interceptor middleware
-  static Middleware createInterceptor(
-    Future<DianaRequest> Function(DianaRequest) interceptorUseMethod,
-  ) {
-    return MiddlewareFactory.createInterceptor(interceptorUseMethod);
+  static Middleware createInterceptor(DianaInterceptor interceptor) {
+    return MiddlewareFactory.createInterceptor(interceptor);
   }
 }

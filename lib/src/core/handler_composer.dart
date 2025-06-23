@@ -1,13 +1,38 @@
 import 'package:diana/src/core/http_method.dart';
 
+import 'base/base.dart';
+
 enum HandlerType { guard, middleware, interceptor }
 
-class HandlerComponent {
-  final HandlerType type;
+sealed class HandlerComponent {
+  HandlerType get type;
+}
 
-  final Function handler;
+class InterceptorComponent extends HandlerComponent {
+  final DianaInterceptor interceptor;
 
-  HandlerComponent(this.type, this.handler);
+  InterceptorComponent(this.interceptor);
+
+  @override
+  HandlerType get type => HandlerType.interceptor;
+}
+
+class GuardComponent extends HandlerComponent {
+  final DianaGuard guard;
+
+  GuardComponent(this.guard);
+
+  @override
+  HandlerType get type => HandlerType.guard;
+}
+
+class MiddlewareComponent extends HandlerComponent {
+  final DianaMiddleware middleware;
+
+  MiddlewareComponent(this.middleware);
+
+  @override
+  HandlerType get type => HandlerType.middleware;
 }
 
 class ControllerComposer {
@@ -17,8 +42,8 @@ class ControllerComposer {
 
   ControllerComposer(this.path);
 
-  void addComponent(HandlerType type, Function handler) {
-    _components.add(HandlerComponent(type, handler));
+  void addComponent(HandlerComponent componentObject) {
+    _components.add(componentObject);
   }
 
   void addRoute(ControllerRouteComposer route) {
@@ -29,24 +54,28 @@ class ControllerComposer {
   List<ControllerRouteComposer> get routes => _routes;
 }
 
-enum parameterType {
+enum ParameterType {
   path,
   query,
+  queryList,
   body,
   header,
   cookie,
   formData,
   file,
   session,
+  request,
   custom,
+  ip,
+  host,
 }
 
 class Parameter {
   final String? name;
   final Type? typeOf;
-  final parameterType type;
+  final ParameterType type;
 
-  Parameter({this.name, this.type = parameterType.query, this.typeOf});
+  Parameter({this.name, this.type = ParameterType.query, this.typeOf});
 }
 
 class ControllerRouteComposer<T extends Function> {
@@ -64,8 +93,8 @@ class ControllerRouteComposer<T extends Function> {
     this.params = const [],
   });
 
-  void addComponent(HandlerType type, Function handler) {
-    _components.add(HandlerComponent(type, handler));
+  void addComponent(HandlerComponent componentObject) {
+    _components.add(componentObject);
   }
 
   List<HandlerComponent> get components => _components;
@@ -75,8 +104,8 @@ class ControllerRouteComposer<T extends Function> {
 class GlobalComposer {
   final List<HandlerComponent> _components = [];
 
-  void addComponent(HandlerType type, Function handler) {
-    _components.add(HandlerComponent(type, handler));
+  void addComponent(HandlerComponent componentObject) {
+    _components.add(componentObject);
   }
 
   List<HandlerComponent> get components => _components;

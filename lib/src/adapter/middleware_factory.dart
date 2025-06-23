@@ -1,25 +1,24 @@
+import '..//core/exceptions/exceptions.dart';
 import 'package:shelf/shelf.dart';
+import '../core/base/base.dart';
 import 'request.dart';
 import 'response.dart';
-import 'handler.dart';
 
 class MiddlewareFactory {
-  static Middleware createGuard(Function handler) {
+  static Middleware createGuard(DianaGuard guard) {
     return (Handler nextHandler) {
       return (Request request) async {
-        final result = await (handler as Future<bool> Function(Request))(
-          request,
-        );
+        final result = await guard.canActivate(DianaRequest.fromShelf(request));
         if (result) {
           return nextHandler(request);
         } else {
-          return Response.forbidden('Access denied');
+          throw ForbiddenException("Access denied");
         }
       };
     };
   }
 
-  static Middleware createMiddleware(Function middlewareUseMethod) {
+  static Middleware createMiddleware(DianaMiddleware middleware) {
     return (Handler nextHandler) {
       return (Request shelfRequest) async {
         final dianaRequest = DianaRequest.fromShelf(shelfRequest);
@@ -29,29 +28,26 @@ class MiddlewareFactory {
           return DianaResponse.fromShelf(shelfResponse);
         }
 
-        final dianaResponse =
-            await (middlewareUseMethod
-                as Future<DianaResponse> Function(DianaRequest, DianaHandler))(
-              dianaRequest,
-              dianaNext,
-            );
+        final dianaResponse = await middleware.use(dianaRequest, dianaNext);
 
         return dianaResponse.shelfResponse;
       };
     };
   }
 
-  static Middleware createInterceptor(
-    Future<DianaRequest> Function(DianaRequest) interceptorUseMethod,
-  ) {
+  static Middleware createInterceptor(DianaInterceptor interceptor) {
     return (Handler nextHandler) {
       return (Request shelfRequest) async {
         final dianaRequest = DianaRequest.fromShelf(shelfRequest);
-        final modifiedDianaRequest = await interceptorUseMethod(dianaRequest);
-        final shelfResponse = await nextHandler(
-          modifiedDianaRequest.shelfRequest,
-        );
-        return shelfResponse;
+
+        await interceptor.onRequest(dianaRequest);
+
+        final shelfResponse = await nextHandler(dianaRequest.shelfRequest);
+        final dianaResponse = DianaResponse.fromShelf(shelfResponse);
+
+        await interceptor.onResponse(dianaResponse);
+
+        return dianaResponse.shelfResponse;
       };
     };
   }

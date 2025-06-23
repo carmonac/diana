@@ -1,0 +1,3 @@
+class Ip {
+  const Ip();
+}

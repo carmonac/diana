@@ -31,21 +31,21 @@ class Adapter {
         case HandlerType.guard:
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createGuard(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as GuardComponent).guard,
             ),
           );
           break;
         case HandlerType.middleware:
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createMiddleware(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as MiddlewareComponent).middleware,
             ),
           );
           break;
         case HandlerType.interceptor:
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createInterceptor(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as InterceptorComponent).interceptor,
             ),
           );
           break;
@@ -61,21 +61,21 @@ class Adapter {
         case HandlerType.guard:
           pipeline.addMiddleware(
             DianaHandlerFactory.createGuard(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as GuardComponent).guard,
             ),
           );
           break;
         case HandlerType.middleware:
           pipeline.addMiddleware(
             DianaHandlerFactory.createMiddleware(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as MiddlewareComponent).middleware,
             ),
           );
           break;
         case HandlerType.interceptor:
           pipeline.addMiddleware(
             DianaHandlerFactory.createInterceptor(
-              component.handler as Future<DianaRequest> Function(DianaRequest),
+              (component as InterceptorComponent).interceptor,
             ),
           );
           break;
@@ -87,24 +87,21 @@ class Adapter {
           case HandlerType.guard:
             pipeline.addMiddleware(
               DianaHandlerFactory.createGuard(
-                component.handler
-                    as Future<DianaRequest> Function(DianaRequest),
+                (component as GuardComponent).guard,
               ),
             );
             break;
           case HandlerType.middleware:
             pipeline.addMiddleware(
               DianaHandlerFactory.createMiddleware(
-                component.handler
-                    as Future<DianaRequest> Function(DianaRequest),
+                (component as MiddlewareComponent).middleware,
               ),
             );
             break;
           case HandlerType.interceptor:
             pipeline.addMiddleware(
               DianaHandlerFactory.createInterceptor(
-                component.handler
-                    as Future<DianaRequest> Function(DianaRequest),
+                (component as InterceptorComponent).interceptor,
               ),
             );
             break;

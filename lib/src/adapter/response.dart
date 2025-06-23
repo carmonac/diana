@@ -60,6 +60,27 @@ class DianaResponse {
     );
   }
 
+  /// Create SSE (Server-Sent Events) response
+  factory DianaResponse.sse(
+    Stream<String> stream, {
+    int statusCode = 200,
+    Map<String, String>? headers,
+  }) {
+    final responseHeaders = <String, String>{
+      'content-type': 'text/event-stream',
+      'cache-control': 'no-cache',
+      'connection': 'keep-alive',
+      ...?headers,
+    };
+    return DianaResponse._(
+      shelf.Response(
+        statusCode,
+        body: stream,
+        headers: responseHeaders.isNotEmpty ? responseHeaders : null,
+      ),
+    );
+  }
+
   /// Create a redirect response
   factory DianaResponse.redirect(
     String location, {
