@@ -1,11 +1,8 @@
-class BadRequestException implements Exception {
-  final String message;
-  final int statusCode = 400;
-  final String errorCode = 'BAD_REQUEST';
-  Object? data;
+import 'diana_http_exception.dart';
 
-  BadRequestException(this.message, {this.data});
-
+class BadRequestException extends DianaHttpException {
+  BadRequestException(super.message, {super.data, super.uri})
+    : super(statusCode: 400, errorCode: 'BAD_REQUEST');
   @override
   String toString() => 'BadRequestException: $message';
 }

@@ -1,3 +1,0 @@
-class Body {
-  const Body();
-}

@@ -1,3 +1,0 @@
-class HostParam {
-  const HostParam();
-}

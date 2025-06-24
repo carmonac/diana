@@ -1,4 +1,17 @@
+export 'diana_http_exception.dart';
 export 'bad_request_exception.dart';
 export 'not_found_exception.dart';
 export 'internal_server_error_exception.dart';
 export 'forbidden_exception.dart';
+export 'unauthorized_exception.dart';
+export 'method_not_allowed_exception.dart';
+export 'not_acceptable_exception.dart';
+export 'request_timeout_exception.dart';
+export 'conflict_exception.dart';
+export 'payload_too_large_exception.dart';
+export 'unsupported_media_type_exception.dart';
+export 'unprocessable_entity_exception.dart';
+export 'too_many_requests_exception.dart';
+export 'bad_gateway_exception.dart';
+export 'service_unavailable_exception.dart';
+export 'gateway_timeout_exception.dart';

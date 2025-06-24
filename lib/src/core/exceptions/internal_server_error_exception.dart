@@ -1,11 +1,8 @@
-class InternalServerErrorException implements Exception {
-  final String message;
-  final int statusCode = 500;
-  final String errorCode = 'INTERNAL_SERVER_ERROR';
-  Object? data;
+import 'diana_http_exception.dart';
 
-  InternalServerErrorException(this.message, {this.data});
-
+class InternalServerErrorException extends DianaHttpException {
+  InternalServerErrorException(super.message, {super.data, super.uri})
+    : super(statusCode: 500, errorCode: 'INTERNAL_SERVER_ERROR');
   @override
   String toString() => 'InternalServerErrorException: $message';
 }

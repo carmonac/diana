@@ -1,11 +1,8 @@
-class ForbiddenException implements Exception {
-  final String message;
-  final int statusCode = 403;
-  final String errorCode = 'FORBIDDEN';
-  Object? data;
+import 'diana_http_exception.dart';
 
-  ForbiddenException(this.message, {this.data});
-
+class ForbiddenException extends DianaHttpException {
+  ForbiddenException(super.message, {super.data, super.uri})
+    : super(statusCode: 403, errorCode: 'FORBIDDEN');
   @override
-  String toString() => 'ForbiddenException: $message';
+  String toString() => 'ForbiddenException: ${super.toString()}';
 }
