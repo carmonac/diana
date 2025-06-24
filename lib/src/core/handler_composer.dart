@@ -1,5 +1,5 @@
-import 'package:diana/src/core/http_method.dart';
-
+import 'http_method.dart';
+import 'parameter_type.dart';
 import 'base/base.dart';
 
 enum HandlerType { guard, middleware, interceptor }
@@ -52,22 +52,6 @@ class ControllerComposer {
 
   List<HandlerComponent> get components => _components;
   List<ControllerRouteComposer> get routes => _routes;
-}
-
-enum ParameterType {
-  path,
-  query,
-  queryList,
-  body,
-  header,
-  cookie,
-  formData,
-  file,
-  session,
-  request,
-  custom,
-  ip,
-  host,
 }
 
 class Parameter {

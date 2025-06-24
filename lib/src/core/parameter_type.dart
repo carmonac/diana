@@ -1,0 +1,16 @@
+enum ParameterType {
+  path,
+  query,
+  queryList,
+  body,
+  header,
+  cookie,
+  formData,
+  file,
+  files,
+  session,
+  request,
+  custom,
+  ip,
+  host,
+}

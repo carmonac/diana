@@ -1,4 +1,5 @@
 import '../core/parameter_type.dart';
+import '../core/body_type.dart';
 import '../core/base/base.dart';
 
 abstract class BaseParameterAnnotation {
@@ -31,11 +32,6 @@ abstract class ComplexParam extends BaseParameterAnnotation {
   });
 }
 
-class Sparql extends ComplexParam {
-  const Sparql({super.key, super.transforms, super.validators})
-    : super(type: ParameterType.sparql);
-}
-
 class Query extends ComplexParam {
   const Query({super.key, super.validators, super.transforms})
     : super(type: ParameterType.query);
@@ -52,8 +48,13 @@ class Param extends ComplexParam {
 }
 
 class Body extends ComplexParam {
-  const Body({super.key, super.transforms, super.validators})
-    : super(type: ParameterType.body);
+  final BodyType bodyType;
+  const Body({
+    super.key,
+    super.transforms,
+    super.validators,
+    this.bodyType = BodyType.json,
+  }) : super(type: ParameterType.body);
 }
 
 class Ip extends SimpleParam {

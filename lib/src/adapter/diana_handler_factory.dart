@@ -1,6 +1,5 @@
 import 'package:diana/src/core/base/base.dart';
 import 'package:shelf/shelf.dart';
-import 'request.dart';
 import 'middleware_factory.dart';
 import 'controller_handler_factory.dart';
 

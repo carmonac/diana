@@ -1,3 +1,3 @@
 abstract class DianaValidator<T> {
-  (bool, String) isValid(T value);
+  Future<(bool, String)> isValid(T value);
 }
