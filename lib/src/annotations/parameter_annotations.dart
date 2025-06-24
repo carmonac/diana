@@ -78,11 +78,6 @@ class File extends ComplexParam {
     : super(type: ParameterType.file);
 }
 
-class Files extends ComplexParam {
-  const Files({super.key, super.validators, super.transforms})
-    : super(type: ParameterType.files);
-}
-
 class Cookie extends SimpleParam {
   const Cookie([String? key]) : super(type: ParameterType.cookie, key: key);
 }

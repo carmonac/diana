@@ -1,6 +1,6 @@
-import '../core/exceptions/exceptions.dart';
 import 'package:shelf/shelf.dart';
 import 'body_parser.dart';
+import 'file_parser.dart';
 import '../core/handler_composer.dart';
 import '../core/type_converter.dart';
 import '../core/parameter_type.dart';
@@ -74,16 +74,8 @@ class ParameterExtractor {
         final cookies =
             request.context['shelf.cookies'] as Map<String, String>?;
         return cookies?[param.name];
-      case ParameterType.formData:
-        final formData =
-            request.context['shelf.formData'] as Map<String, String>?;
-        return formData?[param.name];
       case ParameterType.file:
-        final files = request.context['shelf.files'] as Map<String, dynamic>?;
-        if (param.name == null) {
-          return files;
-        }
-        return files?[param.name];
+        return await FileParser.parseFileParameter(request, param);
       case ParameterType.session:
         final session =
             request.context['shelf.session'] as Map<String, dynamic>?;

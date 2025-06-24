@@ -53,7 +53,7 @@ class ControllerHandlerFactory {
 
   static Handler _createTypedHandler0<R>(R Function() action) {
     return (Request request) async {
-      final result = await action();
+      final result = action();
       return (ResponseProcessor.processResponse(result)).shelfResponse;
     };
   }
@@ -67,7 +67,7 @@ class ControllerHandlerFactory {
         request,
         param1,
       );
-      final result = await action(arg1);
+      final result = action(arg1);
       return (ResponseProcessor.processResponse(result)).shelfResponse;
     };
   }
@@ -86,7 +86,7 @@ class ControllerHandlerFactory {
         request,
         param2,
       );
-      final result = await action(arg1, arg2);
+      final result = action(arg1, arg2);
       return (ResponseProcessor.processResponse(result)).shelfResponse;
     };
   }
