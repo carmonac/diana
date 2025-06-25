@@ -35,4 +35,11 @@ class DianaHandlerFactory {
   static Middleware createInterceptor(DianaInterceptor interceptor) {
     return MiddlewareFactory.createInterceptor(interceptor);
   }
+
+  /// Middleware imported from shelf middleware
+  static Middleware createShelfMiddleware(
+    DianaShelfMiddleware dianaShelfMiddleware,
+  ) {
+    return dianaShelfMiddleware.adapter();
+  }
 }
