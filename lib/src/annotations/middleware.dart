@@ -1,14 +1,13 @@
-import '../core/base/base.dart';
-
 abstract class BaseMiddleware {
-  final DianaMiddleware middleware;
-  const BaseMiddleware(this.middleware);
+  final Type middleware;
+  final Map<String, dynamic> options;
+  const BaseMiddleware(this.middleware, {this.options = const {}});
 }
 
 class Middleware extends BaseMiddleware {
-  const Middleware(super.middleware);
+  const Middleware(super.middleware, {super.options = const {}});
 }
 
 class GlobalMiddleware extends BaseMiddleware {
-  const GlobalMiddleware(super.middleware);
+  const GlobalMiddleware(super.middleware, {super.options = const {}});
 }

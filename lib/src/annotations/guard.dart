@@ -1,14 +1,13 @@
-import '../core/base/base.dart';
-
 abstract class BaseGuard {
-  final DianaGuard guard;
-  const BaseGuard(this.guard);
+  final Type guard;
+  final Map<String, dynamic> options;
+  const BaseGuard(this.guard, {this.options = const {}});
 }
 
 class Guard extends BaseGuard {
-  const Guard(super.guard);
+  const Guard(super.guard, {super.options = const {}});
 }
 
 class GlobalGuard extends BaseGuard {
-  const GlobalGuard(super.guard);
+  const GlobalGuard(super.guard, {super.options = const {}});
 }

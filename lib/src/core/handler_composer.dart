@@ -2,10 +2,8 @@ import 'http_method.dart';
 import 'parameter_type.dart';
 import 'base/base.dart';
 
-enum HandlerType { guard, middleware, interceptor }
-
 sealed class HandlerComponent {
-  HandlerType get type;
+  Type get type;
 }
 
 class InterceptorComponent extends HandlerComponent {
@@ -14,7 +12,7 @@ class InterceptorComponent extends HandlerComponent {
   InterceptorComponent(this.interceptor);
 
   @override
-  HandlerType get type => HandlerType.interceptor;
+  Type get type => DianaInterceptor;
 }
 
 class GuardComponent extends HandlerComponent {
@@ -23,7 +21,7 @@ class GuardComponent extends HandlerComponent {
   GuardComponent(this.guard);
 
   @override
-  HandlerType get type => HandlerType.guard;
+  Type get type => DianaGuard;
 }
 
 class MiddlewareComponent extends HandlerComponent {
@@ -32,7 +30,16 @@ class MiddlewareComponent extends HandlerComponent {
   MiddlewareComponent(this.middleware);
 
   @override
-  HandlerType get type => HandlerType.middleware;
+  Type get type => DianaMiddleware;
+}
+
+class ShelfMiddlewareComponent extends HandlerComponent {
+  final DianaShelfMiddleware dianaShelfMiddleware;
+
+  ShelfMiddlewareComponent(this.dianaShelfMiddleware);
+
+  @override
+  Type get type => DianaShelfMiddleware;
 }
 
 class ControllerComposer {
