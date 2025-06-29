@@ -4,10 +4,10 @@ class DtoRegistry {
 
   static void registerDto<T>({
     required Map<String, dynamic> Function(T object) fieldExtractor,
-    required T Function(Map<String, dynamic>) fromJson,
+    required T Function(Map<String, dynamic>) fromMap,
   }) {
     _fieldExtractors[T] = fieldExtractor;
-    _deserializers[T] = fromJson;
+    _deserializers[T] = fromMap;
   }
 
   static Map<String, dynamic>? serialize(dynamic object) {
@@ -18,20 +18,29 @@ class DtoRegistry {
     return null;
   }
 
-  static T? deserialize<T>(Map<String, dynamic> json) {
+  static T? deserialize<T>(Map<String, dynamic> map) {
     final deserializer = _deserializers[T];
     if (deserializer != null) {
-      return deserializer(json) as T;
+      return deserializer(map) as T;
     }
     return null;
   }
 
-  static dynamic deserializeByType(Map<String, dynamic> json, Type type) {
+  static dynamic deserializeByType(Map<String, dynamic> map, Type type) {
     final deserializer = _deserializers[type];
-    return deserializer?.call(json);
+    return deserializer?.call(map);
   }
 
   static bool isRegistered(Type type) {
     return _fieldExtractors.containsKey(type);
+  }
+
+  static Type? findTypeByName(String typeName) {
+    for (final type in _fieldExtractors.keys) {
+      if (type.toString() == typeName) {
+        return type;
+      }
+    }
+    return null;
   }
 }

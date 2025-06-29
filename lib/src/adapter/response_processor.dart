@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:shelf/shelf.dart';
 import '../core/dto_registry.dart';
+import '../core/no_content.dart';
+
 import 'response.dart';
 
 class ResponseProcessor {
@@ -12,6 +14,8 @@ class ResponseProcessor {
       return DianaResponse.fromShelf(result);
     } else if (result is String) {
       return DianaResponse.text(result);
+    } else if (result is NoContent) {
+      return DianaResponse.noContent();
     } else if (result == null) {
       return DianaResponse.ok(null);
     } else {

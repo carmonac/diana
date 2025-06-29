@@ -65,8 +65,16 @@ class Parameter {
   final String? name;
   final Type? typeOf;
   final ParameterType type;
+  final List<DianaValidator>? validators;
+  final List<DianaTransformer>? transformers;
 
-  Parameter({this.name, this.type = ParameterType.query, this.typeOf});
+  Parameter({
+    this.name,
+    this.type = ParameterType.query,
+    this.typeOf,
+    this.validators,
+    this.transformers,
+  });
 }
 
 class ControllerRouteComposer<T extends Function> {

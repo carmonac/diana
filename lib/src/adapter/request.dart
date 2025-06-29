@@ -25,8 +25,18 @@ class DianaRequest {
   /// Query parameters
   Map<String, String> get queryParameters => _shelfRequest.url.queryParameters;
 
+  /// Get content type
+  String? get contentType => _shelfRequest.headers['content-type'];
+
+  /// Get accept header
+  String? get accept => _shelfRequest.headers['accept'];
+
   /// Read body as string
   Future<String> readAsString() => _shelfRequest.readAsString();
+
+  /// Read body as bytes
+  Future<List<int>> readAsBytes() =>
+      _shelfRequest.read().expand((x) => x).toList();
 
   /// Get a specific header
   String? header(String name) => _shelfRequest.headers[name.toLowerCase()];

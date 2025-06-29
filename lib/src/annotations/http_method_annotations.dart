@@ -1,26 +1,67 @@
 abstract class BaseHttpMethodAnnotation {
   final String method;
-  final String? path;
+  final String path;
+  final String? description;
+  final String outputContentType;
+  final String inputContentType;
+  final int defaultStatusCode;
 
-  const BaseHttpMethodAnnotation(this.method, this.path);
+  const BaseHttpMethodAnnotation({
+    required this.method,
+    required this.path,
+    this.description,
+    this.outputContentType = 'application/json',
+    this.inputContentType = 'application/json',
+    required this.defaultStatusCode,
+  });
 }
 
 class Get extends BaseHttpMethodAnnotation {
-  const Get([String path = '/']) : super('GET', path);
+  const Get({
+    super.path = '',
+    super.description,
+    super.outputContentType,
+    super.inputContentType,
+    super.defaultStatusCode = 200,
+  }) : super(method: 'GET');
 }
 
 class Post extends BaseHttpMethodAnnotation {
-  const Post([String path = '/']) : super('POST', path);
+  const Post({
+    super.path = '',
+    super.description,
+    super.outputContentType,
+    super.inputContentType,
+    super.defaultStatusCode = 201,
+  }) : super(method: 'POST');
 }
 
 class Put extends BaseHttpMethodAnnotation {
-  const Put([String path = '/']) : super('PUT', path);
+  const Put({
+    super.path = '',
+    super.description,
+    super.outputContentType,
+    super.inputContentType,
+    super.defaultStatusCode = 200,
+  }) : super(method: 'PUT');
 }
 
 class Delete extends BaseHttpMethodAnnotation {
-  const Delete([String path = '/']) : super('DELETE', path);
+  const Delete({
+    super.path = '',
+    super.description,
+    super.outputContentType,
+    super.inputContentType,
+    super.defaultStatusCode = 204,
+  }) : super(method: 'DELETE');
 }
 
 class Patch extends BaseHttpMethodAnnotation {
-  const Patch([String path = '/']) : super('PATCH', path);
+  const Patch({
+    super.path = '',
+    super.description,
+    super.outputContentType,
+    super.inputContentType,
+    super.defaultStatusCode = 200,
+  }) : super(method: 'PATCH');
 }

@@ -15,7 +15,17 @@ class Adapter {
   final String prefix;
   final Middleware? errorHandler;
 
-  Adapter({this.prefix = '', this.errorHandler});
+  Adapter({
+    this.prefix = '',
+    this.errorHandler,
+    GlobalComposer? globalComposer,
+    List<ControllerComposer> controllers = const [],
+  }) {
+    setUpGlobalPipeline(globalComposer);
+    for (final controller in controllers) {
+      setUpController(controller);
+    }
+  }
 
   void setUpGlobalPipeline([GlobalComposer? globalComposer]) {
     globalPipeline.addMiddleware((Handler nextHandler) {

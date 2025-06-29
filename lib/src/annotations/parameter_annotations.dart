@@ -1,5 +1,4 @@
 import '../core/parameter_type.dart';
-import '../core/body_type.dart';
 import '../core/base/base.dart';
 
 abstract class BaseParameterAnnotation {
@@ -48,12 +47,12 @@ class Param extends ComplexParam {
 }
 
 class Body extends ComplexParam {
-  final BodyType bodyType;
+  final List<String> contentType;
   const Body({
     super.key,
     super.transforms,
     super.validators,
-    this.bodyType = BodyType.json,
+    this.contentType = const ["application/json"],
   }) : super(type: ParameterType.body);
 }
 
@@ -73,8 +72,8 @@ class Header extends SimpleParam {
   const Header([String? key]) : super(type: ParameterType.header, key: key);
 }
 
-class File extends ComplexParam {
-  const File({super.key, super.validators, super.transforms})
+class FileParam extends ComplexParam {
+  const FileParam({super.key, super.validators, super.transforms})
     : super(type: ParameterType.file);
 }
 

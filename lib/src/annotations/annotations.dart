@@ -1,9 +1,10 @@
 export 'controller.dart';
 export 'http_method_annotations.dart';
 export 'dto.dart';
-export 'json_key.dart';
+export 'prop_key.dart';
 export 'validator.dart';
 export 'guard.dart';
 export 'interceptor.dart';
 export 'middleware.dart';
 export 'parameter_annotations.dart';
+export 'static.dart';
