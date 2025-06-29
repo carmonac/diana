@@ -1,7 +1,7 @@
 import '../core/exceptions/exceptions.dart';
 import 'package:shelf/shelf.dart';
 import 'body_parser.dart';
-//import 'file_parser.dart';
+import 'file_parser.dart';
 import '../core/base/base.dart';
 import '../core/handler_composer.dart';
 import '../core/type_converter.dart';
@@ -86,9 +86,8 @@ class ParameterExtractor {
         final cookies =
             request.context['shelf.cookies'] as Map<String, String>?;
         return _processValue(cookies?[param.name], param);
-
-      //case ParameterType.file:
-      //  value = await FileParser.parseFileParameter(request, param);
+      case ParameterType.file:
+        return await FileParser.parseFileParameter(request, param);
       case ParameterType.session:
         final session =
             request.context['shelf.session'] as Map<String, dynamic>?;

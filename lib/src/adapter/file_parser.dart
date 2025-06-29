@@ -1,28 +1,38 @@
-import './parsers/parsers.dart';
+import '../core/base/base.dart';
+import '../core/content_type_registry.dart';
 import 'package:shelf/shelf.dart';
+import '../core/file_data.dart';
 import '../core/handler_composer.dart';
+import 'request.dart';
 
 class FileParser {
   static Future<dynamic> parseFileParameter(
     Request request,
     Parameter param,
   ) async {
-    final contentType = request.headers['content-type'];
-
-    if (contentType == null) {
-      return null;
+    final contentType =
+        request.headers['content-type'] ?? 'application/octet-stream';
+    final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
+      contentType,
+    );
+    if (contentTypeHandler == null) {
+      throw Exception('Unsupported content type: $contentType');
+    }
+    if (contentTypeHandler is! Deserializable) {
+      throw Exception('Content type handler does not support deserialization');
+    }
+    if (param.typeOf is! FileData) {
+      throw Exception('Parameter type must be FileData for file parsing');
     }
 
-    // multipart/form-data for file uploads
-    if (contentType.toLowerCase().contains('multipart/form-data')) {
-      return await MultipartFileParser.parse(request, param);
-    }
+    final DianaRequest dianaRequest = DianaRequest.fromShelf(request);
+    final bodyObject = await (contentTypeHandler as Deserializable).deserialize(
+      dianaRequest,
+      FileData,
+    );
 
-    // application/octet-stream for binary file uploads
-    if (contentType.toLowerCase().contains('application/octet-stream')) {
-      return await OctetStreamParser.parse(request, param);
-    }
-
-    return null;
+    return bodyObject is FileData
+        ? bodyObject
+        : throw Exception('Deserialized body is not of type FileData');
   }
 }
