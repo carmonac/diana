@@ -5,20 +5,17 @@ import 'controller_handler_factory.dart';
 
 /// Main handler factory for Diana framework
 class DianaHandlerFactory {
-  /// Creates a basic controller handler
+  /// Creates an optimized controller handler based on parameter count
   static Handler createControllerHandler<T extends Function>(
     T action,
-    List<dynamic> params,
-  ) {
-    return ControllerHandlerFactory.createHandler(action, params);
-  }
-
-  /// Creates an optimized controller handler based on parameter count
-  static Handler createOptimizedControllerHandler<T extends Function>(
-    T action,
-    List<dynamic> params,
-  ) {
-    return ControllerHandlerFactory.createOptimizedHandler(action, params);
+    List<dynamic> params, {
+    required String outputContentType,
+  }) {
+    return ControllerHandlerFactory.createOptimizedHandler(
+      action,
+      params,
+      outputContentType: outputContentType,
+    );
   }
 
   /// Creates a guard middleware

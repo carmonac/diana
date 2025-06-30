@@ -1,13 +1,12 @@
-import 'dart:convert';
-
 import 'package:shelf/shelf.dart';
-import '../core/dto_registry.dart';
+import '../core/base/serializer.dart';
+import '../core/content_type_registry.dart';
 import '../core/no_content.dart';
 
 import 'response.dart';
 
 class ResponseProcessor {
-  static DianaResponse processResponse(dynamic result) {
+  static DianaResponse processResponse(dynamic result, String acceptType) {
     if (result is DianaResponse) {
       return result;
     } else if (result is Response) {
@@ -19,48 +18,23 @@ class ResponseProcessor {
     } else if (result == null) {
       return DianaResponse.ok(null);
     } else {
-      // Intentar serializar como JSON, si falla usar toString()
+      final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
+        acceptType,
+      );
+
+      if (contentTypeHandler == null || contentTypeHandler is! Serializable) {
+        return DianaResponse.text(result.toString());
+      }
       try {
-        final jsonData = _convertToJson(result);
-        return DianaResponse.json(jsonData);
+        return DianaResponse(
+          200,
+          body: (contentTypeHandler as Serializable).serialize(result),
+          headers: {'Content-Type': acceptType},
+        );
       } catch (e) {
-        print('Failed to serialize response to JSON: $e');
+        print('Failed to serialize response: $e');
         return DianaResponse.text(result.toString());
       }
     }
-  }
-
-  static dynamic _convertToJson(dynamic object) {
-    if (object == null || object is String || object is num || object is bool) {
-      return object;
-    }
-
-    if (object is List) {
-      return object.map(_convertToJson).toList();
-    }
-
-    if (object is Map) {
-      return object.map(
-        (key, value) => MapEntry(key.toString(), _convertToJson(value)),
-      );
-    }
-
-    if (DtoRegistry.isRegistered(object.runtimeType)) {
-      final serializedData = DtoRegistry.serialize(object);
-      if (serializedData != null) {
-        return serializedData;
-      }
-    }
-
-    try {
-      final toJsonMethod = (object as dynamic).toJson;
-      if (toJsonMethod != null) {
-        return toJsonMethod();
-      }
-    } catch (e) {
-      // El objeto no tiene toJson(), continuar
-    }
-
-    return json.decode(json.encode(object));
   }
 }

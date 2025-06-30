@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../core/exceptions/exceptions.dart';
 import '../core/handler_composer.dart';
 import '../core/utils.dart';
 import 'diana_handler_factory.dart';
@@ -14,12 +15,16 @@ class Adapter {
   final globalPipeline = Pipeline();
   final String prefix;
   final Middleware? errorHandler;
+  final String defaultOutputContentType;
+  final DianaHttpErrorBuilder? errorBuilder;
 
   Adapter({
     this.prefix = '',
     this.errorHandler,
     GlobalComposer? globalComposer,
     List<ControllerComposer> controllers = const [],
+    this.defaultOutputContentType = 'application/json',
+    this.errorBuilder,
   }) {
     setUpGlobalPipeline(globalComposer);
     for (final controller in controllers) {
@@ -41,7 +46,12 @@ class Adapter {
     if (errorHandler != null) {
       globalPipeline.addMiddleware(errorHandler!);
     } else {
-      globalPipeline.addMiddleware(ErrorResponse.dianaErrorResponse());
+      globalPipeline.addMiddleware(
+        ErrorResponse.dianaErrorResponse(
+          defaultOutputContentType,
+          errorBuilder,
+        ),
+      );
     }
 
     if (globalComposer == null) {
@@ -154,9 +164,10 @@ class Adapter {
         route.method.name.toLowerCase(),
         route.path,
         pipeline.addHandler(
-          DianaHandlerFactory.createOptimizedControllerHandler(
+          DianaHandlerFactory.createControllerHandler(
             route.action,
             route.params,
+            outputContentType: defaultOutputContentType,
           ),
         ),
       );

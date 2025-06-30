@@ -13,3 +13,5 @@ export 'src/core/parameter_type.dart';
 export 'src/core/no_content.dart';
 export 'src/core/exceptions/exceptions.dart';
 export 'src/core/file_data.dart';
+export 'src/addons/contenttypes/contentypes.dart';
+export 'src/core/content_type_registry.dart';

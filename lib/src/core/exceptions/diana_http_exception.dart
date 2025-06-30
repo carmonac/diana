@@ -17,3 +17,5 @@ class DianaHttpException extends HttpException {
   String toString() =>
       'DianaHttpException: $message (Status: $statusCode, Code: $errorCode)';
 }
+
+typedef DianaHttpErrorBuilder = dynamic Function(DianaHttpException exception);

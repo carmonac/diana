@@ -9,17 +9,25 @@ import '../addons/contenttypes/xml_content_type.dart';
 import 'base/base.dart';
 
 class ContentTypeRegistry {
+  static final List<ContentType> _preLoadedContentTypes = [
+    FormUrlEncondeContentType(),
+    FormdataContentType(),
+    JsonContentType(),
+    OctetStreamContentType(),
+    PlainTextContentType(),
+    XmlContentType(),
+    HtmlContentType(),
+  ];
+
+  /// Initializes the registry with pre-loaded content types.
+  static void initialize() {
+    for (ContentType contentType in _preLoadedContentTypes) {
+      registerContentTypeObject(contentType);
+    }
+  }
+
   // Map initialized with default contentTypeControllers
-  static final Map<String, ContentType> contentTypeControllers = {
-    'application/x-www-form-urlencoded': FormUrlEncondeContentType(),
-    'multipart/form-data': FormdataContentType(),
-    'application/json': JsonContentType(),
-    'application/octet-stream': OctetStreamContentType(),
-    'text/plain': PlainTextContentType(),
-    'application/xml': XmlContentType(),
-    'text/xml': XmlContentType(),
-    'text/html': HtmlContentType(),
-  };
+  static final Map<String, ContentType> contentTypeControllers = {};
 
   static void registerContentTypeObject<T extends ContentType>(T ctype) {
     for (String contentTypeDesc in ctype.contentType) {
@@ -28,7 +36,20 @@ class ContentTypeRegistry {
   }
 
   static ContentType? getContentTypeHandler(String contentType) {
-    return contentTypeControllers[contentType] ??
-        contentTypeControllers['text/plain'];
+    final key = _parseAcceptHeader(contentType) ?? contentType;
+    return contentTypeControllers[key] ?? contentTypeControllers['text/plain'];
+  }
+
+  static String? _parseAcceptHeader(String acceptHeader) {
+    final acceptTypes = acceptHeader.split(',');
+
+    for (final type in acceptTypes) {
+      final cleanType = type.split(';')[0].trim();
+      if (cleanType.isNotEmpty && cleanType != '*/*') {
+        return cleanType.toLowerCase();
+      }
+    }
+
+    return null;
   }
 }

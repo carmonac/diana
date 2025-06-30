@@ -30,21 +30,6 @@ class DianaResponse {
     );
   }
 
-  /// Create a JSON response
-  factory DianaResponse.json(
-    Object? data, {
-    int statusCode = 200,
-    Map<String, String>? headers,
-  }) {
-    return DianaResponse._(
-      shelf.Response(
-        statusCode,
-        body: data != null ? json.encode(data) : null,
-        headers: {'content-type': 'application/json', ...?headers},
-      ),
-    );
-  }
-
   /// Create a text response
   factory DianaResponse.text(
     String body, {
@@ -73,11 +58,7 @@ class DianaResponse {
       ...?headers,
     };
     return DianaResponse._(
-      shelf.Response(
-        statusCode,
-        body: stream,
-        headers: responseHeaders.isNotEmpty ? responseHeaders : null,
-      ),
+      shelf.Response(statusCode, body: stream, headers: responseHeaders),
     );
   }
 
@@ -99,21 +80,6 @@ class DianaResponse {
   /// Create a no content response
   factory DianaResponse.noContent({Map<String, String>? headers}) {
     return DianaResponse._(shelf.Response(204, headers: headers));
-  }
-
-  /// Create a xml response
-  factory DianaResponse.xml(
-    Object? data, {
-    int statusCode = 200,
-    Map<String, String>? headers,
-  }) {
-    return DianaResponse._(
-      shelf.Response(
-        statusCode,
-        body: data != null ? _convertToXml(data) : null,
-        headers: {'content-type': 'application/xml', ...?headers},
-      ),
-    );
   }
 
   /// Create a custom response
@@ -145,85 +111,4 @@ class DianaResponse {
 
   /// Internal shelf response (for framework internal use only)
   shelf.Response get shelfResponse => _shelfResponse;
-
-  /// Convert data to XML string
-  static String _convertToXml(Object data) {
-    if (data is String) {
-      // Si ya es un string, asumimos que es XML válido
-      return data;
-    } else if (data is Map<String, dynamic>) {
-      // Convertir Map a XML básico
-      return _mapToXml(data);
-    } else if (data is List) {
-      // Convertir List a XML básico
-      return _listToXml(data);
-    } else {
-      // Para otros tipos, wrap en un elemento raíz
-      return '<root>${_escapeXml(data.toString())}</root>';
-    }
-  }
-
-  /// Convert Map to XML
-  static String _mapToXml(
-    Map<String, dynamic> map, {
-    String rootElement = 'root',
-  }) {
-    final buffer = StringBuffer();
-    buffer.write('<$rootElement>');
-
-    map.forEach((key, value) {
-      final safeKey = _sanitizeXmlElementName(key);
-      buffer.write('<$safeKey>');
-
-      if (value is Map<String, dynamic>) {
-        buffer.write(_mapToXml(value, rootElement: 'item'));
-      } else if (value is List) {
-        buffer.write(_listToXml(value));
-      } else {
-        buffer.write(_escapeXml(value?.toString() ?? ''));
-      }
-
-      buffer.write('</$safeKey>');
-    });
-
-    buffer.write('</$rootElement>');
-    return buffer.toString();
-  }
-
-  /// Convert List to XML
-  static String _listToXml(List list) {
-    final buffer = StringBuffer();
-
-    for (int i = 0; i < list.length; i++) {
-      buffer.write('<item>');
-
-      if (list[i] is Map<String, dynamic>) {
-        buffer.write(_mapToXml(list[i], rootElement: 'entry'));
-      } else if (list[i] is List) {
-        buffer.write(_listToXml(list[i]));
-      } else {
-        buffer.write(_escapeXml(list[i]?.toString() ?? ''));
-      }
-
-      buffer.write('</item>');
-    }
-
-    return buffer.toString();
-  }
-
-  /// Escape XML special characters
-  static String _escapeXml(String text) {
-    return text
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&apos;');
-  }
-
-  /// Sanitize XML element names (remove invalid characters)
-  static String _sanitizeXmlElementName(String name) {
-    // Remover caracteres no válidos para nombres de elementos XML
-    return name.replaceAll(RegExp(r'[^a-zA-Z0-9_-]'), '_');
-  }
 }
