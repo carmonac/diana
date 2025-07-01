@@ -188,9 +188,4 @@ class JsonContentType extends ContentType with Serializable, Deserializable {
     }
     return DtoRegistry.findTypeByName(typeName);
   }
-
-  @override
-  set contentType(List<String> value) {
-    // TODO: implement contentType
-  }
 }
