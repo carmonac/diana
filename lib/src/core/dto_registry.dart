@@ -1,13 +1,18 @@
 class DtoRegistry {
   static final Map<Type, Function> _fieldExtractors = {};
   static final Map<Type, Function> _deserializers = {};
+  static final Map<Type, Function> _customOptions = {};
 
   static void registerDto<T>({
     required Map<String, dynamic> Function(T object) fieldExtractor,
     required T Function(Map<String, dynamic>) fromMap,
+    Map<String, dynamic> Function(T object)? customOptions,
   }) {
     _fieldExtractors[T] = fieldExtractor;
     _deserializers[T] = fromMap;
+    if (customOptions != null) {
+      _customOptions[T] = customOptions;
+    }
   }
 
   static Map<String, dynamic>? serialize(dynamic object) {
@@ -40,6 +45,15 @@ class DtoRegistry {
       if (type.toString() == typeName) {
         return type;
       }
+    }
+    return null;
+  }
+
+  static Map<String, dynamic>? getCustomOptions(dynamic object) {
+    final type = object.runtimeType;
+    final customOptionsExtractor = _customOptions[type];
+    if (customOptionsExtractor != null) {
+      return customOptionsExtractor(object) as Map<String, dynamic>;
     }
     return null;
   }

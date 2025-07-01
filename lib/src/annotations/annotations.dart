@@ -9,3 +9,4 @@ export 'middleware.dart';
 export 'parameter_annotations.dart';
 export 'static.dart';
 export 'content_type_serializer.dart';
+export 'service.dart';
