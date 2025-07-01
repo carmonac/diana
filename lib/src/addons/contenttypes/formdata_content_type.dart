@@ -18,10 +18,7 @@ class FormdataContentType extends ContentType with Deserializable {
       }
 
       final bodyBytes = await request.readAsBytes();
-      final formData = await _parseMultipartData(
-        Uint8List.fromList(bodyBytes),
-        boundary,
-      );
+      final formData = await _parseMultipartData(bodyBytes, boundary);
 
       if (DtoRegistry.isRegistered(type)) {
         return DtoRegistry.deserializeByType(formData, type);
@@ -46,7 +43,7 @@ class FormdataContentType extends ContentType with Deserializable {
   }
 
   Future<Map<String, dynamic>> _parseMultipartData(
-    Uint8List bodyBytes,
+    List<int> bodyBytes,
     String boundary,
   ) async {
     final formData = <String, dynamic>{};
@@ -87,7 +84,7 @@ class FormdataContentType extends ContentType with Deserializable {
     return formData;
   }
 
-  bool _bytesEqual(Uint8List source, int offset, List<int> pattern) {
+  bool _bytesEqual(List<int> source, int offset, List<int> pattern) {
     if (offset + pattern.length > source.length) return false;
     for (int i = 0; i < pattern.length; i++) {
       if (source[offset + i] != pattern[i]) return false;
@@ -96,7 +93,7 @@ class FormdataContentType extends ContentType with Deserializable {
   }
 
   Future<void> _processPart(
-    Uint8List partBytes,
+    List<int> partBytes,
     Map<String, dynamic> formData,
   ) async {
     // Find header/body separation (\r\n\r\n)
@@ -126,7 +123,9 @@ class FormdataContentType extends ContentType with Deserializable {
     if (fileName != null && fileName.isNotEmpty) {
       formData[fieldName] = FileData(
         filename: fileName,
-        content: contentBytes,
+        content: contentBytes is Uint8List
+            ? contentBytes
+            : Uint8List.fromList(contentBytes),
         contentType: contentType ?? 'application/octet-stream',
         size: contentBytes.length,
       );

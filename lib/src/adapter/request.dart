@@ -38,6 +38,9 @@ class DianaRequest {
   Future<List<int>> readAsBytes() =>
       _shelfRequest.read().expand((x) => x).toList();
 
+  /// Read body as stream
+  Stream<List<int>> read() => _shelfRequest.read();
+
   /// Get a specific header
   String? header(String name) => _shelfRequest.headers[name.toLowerCase()];
 

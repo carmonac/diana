@@ -81,6 +81,21 @@ class DianaResponse {
     return DianaResponse._(shelf.Response(204, headers: headers));
   }
 
+  /// Response not found
+  factory DianaResponse.notFound([String? message]) {
+    return DianaResponse._(shelf.Response.notFound(message));
+  }
+
+  /// Response internal server error
+  factory DianaResponse.internalServerError([String? message]) {
+    return DianaResponse._(shelf.Response.internalServerError(body: message));
+  }
+
+  /// Create a found response (HTTP 302)
+  factory DianaResponse.found(String location, {Map<String, String>? headers}) {
+    return DianaResponse._(shelf.Response.found(location, headers: headers));
+  }
+
   /// Create a custom response
   factory DianaResponse(
     int statusCode, {
@@ -90,16 +105,6 @@ class DianaResponse {
     return DianaResponse._(
       shelf.Response(statusCode, body: body, headers: headers),
     );
-  }
-
-  /// Create a not found response
-  factory DianaResponse.notFound([String? message]) {
-    return DianaResponse._(shelf.Response.notFound(message));
-  }
-
-  /// Create an internal server error response
-  factory DianaResponse.internalServerError([String? message]) {
-    return DianaResponse._(shelf.Response.internalServerError(body: message));
   }
 
   /// Response status code

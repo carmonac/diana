@@ -9,13 +9,23 @@ class OctetStreamContentType extends ContentType
 
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {
-    final bodyBytes = await request.readAsBytes();
-    if (bodyBytes.isEmpty) {
+    final bytesBuilder = BytesBuilder(copy: false);
+    await for (final chunk in request.read()) {
+      bytesBuilder.add(chunk);
+    }
+
+    final contentBytes = bytesBuilder.takeBytes();
+
+    if (contentBytes.isEmpty) {
       throw BadRequestException('Empty body for application/octet-stream');
     }
 
-    // Convert List<int> to Uint8List
-    final contentBytes = Uint8List.fromList(bodyBytes);
+    // final bodyBytes = await request.readAsBytes();
+    // if (bodyBytes.isEmpty) {
+    //   throw BadRequestException('Empty body for application/octet-stream');
+    // }
+    // // Convert List<int> to Uint8List
+    // final contentBytes = Uint8List.fromList(bodyBytes);
 
     // Extract filename from headers (could be Content-Disposition)
     final filename = request.header('content-disposition') != null
