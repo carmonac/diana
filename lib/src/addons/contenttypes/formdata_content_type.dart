@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:diana/diana.dart';
 
-class FormdataContentType with Deserializable implements ContentType {
-  @override
-  List<String> get contentType => ['multipart/form-data'];
+@ContentTypeSerializer(['multipart/form-data'])
+class FormdataContentType extends ContentType with Deserializable {
+  FormdataContentType(super.contentTypes);
 
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {

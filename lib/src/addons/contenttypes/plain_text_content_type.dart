@@ -1,10 +1,9 @@
 import 'package:diana/diana.dart';
 
-class PlainTextContentType
-    with Serializable, Deserializable
-    implements ContentType {
-  @override
-  List<String> get contentType => ['text/plain'];
+@ContentTypeSerializer(['text/plain'])
+class PlainTextContentType extends ContentType
+    with Serializable, Deserializable {
+  PlainTextContentType(super.contentTypes);
 
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {

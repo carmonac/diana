@@ -2,9 +2,11 @@ import 'dart:typed_data';
 
 import 'package:diana/diana.dart';
 
-class OctetStreamContentType
-    with Deserializable, Serializable
-    implements ContentType {
+@ContentTypeSerializer(['application/octet-stream'])
+class OctetStreamContentType extends ContentType
+    with Deserializable, Serializable {
+  OctetStreamContentType(super.contentTypes);
+
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {
     final bodyBytes = await request.readAsBytes();
@@ -56,7 +58,4 @@ class OctetStreamContentType
     ).firstMatch(contentDisposition);
     return match?.group(1) ?? 'file';
   }
-
-  @override
-  List<String> get contentType => ['application/octet-stream'];
 }

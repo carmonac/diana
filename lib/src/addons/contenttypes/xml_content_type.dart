@@ -2,9 +2,9 @@ import 'package:xml/xml.dart';
 
 import 'package:diana/diana.dart';
 
-class XmlContentType with Serializable, Deserializable implements ContentType {
-  @override
-  List<String> get contentType => ['application/xml', 'text/xml'];
+@ContentTypeSerializer(['application/xml', 'text/xml'])
+class XmlContentType extends ContentType with Serializable, Deserializable {
+  XmlContentType(super.contentTypes);
 
   @override
   Future deserialize(DianaRequest request, Type type) async {

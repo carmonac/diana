@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:diana/diana.dart';
 
-class JsonContentType with Serializable, Deserializable implements ContentType {
-  @override
-  List<String> get contentType => ['application/json'];
+@ContentTypeSerializer(['application/json', 'text/json'])
+class JsonContentType extends ContentType with Serializable, Deserializable {
+  JsonContentType(super.contentTypes);
 
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {
@@ -187,5 +187,10 @@ class JsonContentType with Serializable, Deserializable implements ContentType {
         return dynamic;
     }
     return DtoRegistry.findTypeByName(typeName);
+  }
+
+  @override
+  set contentType(List<String> value) {
+    // TODO: implement contentType
   }
 }

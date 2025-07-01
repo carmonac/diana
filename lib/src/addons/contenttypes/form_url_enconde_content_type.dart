@@ -1,8 +1,8 @@
 import 'package:diana/diana.dart';
 
-class FormUrlEncondeContentType with Deserializable implements ContentType {
-  @override
-  List<String> get contentType => ['application/x-www-form-urlencoded'];
+@ContentTypeSerializer(['application/x-www-form-urlencoded'])
+class FormUrlEncondeContentType extends ContentType with Deserializable {
+  FormUrlEncondeContentType(super.contentTypes);
 
   @override
   Future deserialize(DianaRequest request, Type type) async {

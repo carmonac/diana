@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:shelf/shelf.dart' as shelf;
 
 /// Diana framework HTTP response abstraction

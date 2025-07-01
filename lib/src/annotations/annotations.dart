@@ -8,3 +8,4 @@ export 'interceptor.dart';
 export 'middleware.dart';
 export 'parameter_annotations.dart';
 export 'static.dart';
+export 'content_type_serializer.dart';
