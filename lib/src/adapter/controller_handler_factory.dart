@@ -1,4 +1,5 @@
 import 'package:shelf/shelf.dart';
+import 'package:shelf_static/shelf_static.dart';
 import '../core/handler_composer.dart';
 import 'parameter_extractor.dart';
 import 'response_processor.dart';
@@ -92,5 +93,17 @@ class ControllerHandlerFactory {
       param2,
     );
     return await action(arg1, arg2);
+  }
+
+  static Handler createStaticFileServerHandler(
+    String localPath, {
+    String? defaultDocument,
+    bool listDirectory = false,
+  }) {
+    return createStaticHandler(
+      localPath,
+      defaultDocument: defaultDocument,
+      listDirectories: listDirectory,
+    );
   }
 }

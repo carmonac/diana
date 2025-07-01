@@ -160,6 +160,19 @@ class Adapter {
         }
       }
 
+      if (route.isStaticFileServer) {
+        router.all(
+          route.path,
+          pipeline.addHandler(
+            DianaHandlerFactory.createStaticFileServer(route.staticOptions!),
+          ),
+        );
+        print(
+          'Static file server registered $prefix${controllerComposer.path}${route.path}',
+        );
+        continue;
+      }
+
       router.add(
         route.method.name.toLowerCase(),
         route.path,

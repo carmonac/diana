@@ -1,4 +1,5 @@
 import 'package:diana/src/core/base/base.dart';
+import 'package:diana/src/core/static_options.dart';
 import 'package:shelf/shelf.dart';
 import 'middleware_factory.dart';
 import 'controller_handler_factory.dart';
@@ -15,6 +16,15 @@ class DianaHandlerFactory {
       action,
       params,
       outputContentType: outputContentType,
+    );
+  }
+
+  /// Creates static file server handler
+  static Handler createStaticFileServer(StaticOptions staticOptions) {
+    return ControllerHandlerFactory.createStaticFileServerHandler(
+      staticOptions.path,
+      defaultDocument: staticOptions.defaultDocument,
+      listDirectory: staticOptions.listDirectory,
     );
   }
 

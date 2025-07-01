@@ -1,6 +1,7 @@
 import 'http_method.dart';
 import 'parameter_type.dart';
 import 'base/base.dart';
+import 'static_options.dart';
 
 sealed class HandlerComponent {
   Type get type;
@@ -81,6 +82,10 @@ class ControllerRouteComposer<T extends Function> {
   final String path;
   final HttpMethod method;
   final T action;
+  final bool isStaticFileServer;
+
+  /// If true, this route will serve static files.
+  final StaticOptions? staticOptions;
 
   final List<HandlerComponent> _components = [];
   final List<Parameter> params;
@@ -90,6 +95,8 @@ class ControllerRouteComposer<T extends Function> {
     required this.method,
     required this.action,
     this.params = const [],
+    this.isStaticFileServer = false,
+    this.staticOptions,
   });
 
   void addComponent(HandlerComponent componentObject) {
