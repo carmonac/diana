@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:shelf/shelf.dart' as shelf;
 
 /// Diana framework HTTP request abstraction
@@ -46,6 +48,13 @@ class DianaRequest {
 
   /// Get context value
   T? getContext<T>(String key) => _shelfRequest.context[key] as T?;
+
+  /// Get the client connection information
+  /// Returns null if not available
+  /// This is useful for getting client IP address, port, etc.
+  HttpConnectionInfo? connectionInfo() =>
+      (_shelfRequest.context['shelf.io.connection_info']
+          as HttpConnectionInfo?);
 
   /// Create a copy with modified context
   DianaRequest copyWith({Map<String, Object?>? context}) {

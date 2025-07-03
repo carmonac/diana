@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import '../core/exceptions/exceptions.dart';
 import 'package:shelf/shelf.dart';
 import 'body_parser.dart';
@@ -7,6 +9,7 @@ import '../core/handler_composer.dart';
 import '../core/type_converter.dart';
 import '../core/parameter_type.dart';
 import 'request.dart';
+import 'secure_cookie_handler.dart';
 
 class ParameterExtractor {
   static Future<List<dynamic>> extractParametersAsync(
@@ -77,15 +80,9 @@ class ParameterExtractor {
         Object obj = await BodyParser.parseBodyParameter(request, param);
         return _processValue(obj, param);
       case ParameterType.cookie:
-        if (param.name == null) {
-          return _processValue(
-            request.context['shelf.cookies'] as Map<String, String>?,
-            param,
-          );
-        }
-        final cookies =
-            request.context['shelf.cookies'] as Map<String, String>?;
-        return _processValue(cookies?[param.name], param);
+        SecureCookieHandler cookieHandler =
+            request.context['cookie_handler'] as SecureCookieHandler;
+        return cookieHandler;
       case ParameterType.file:
         return await FileParser.parseFileParameter(request, param);
       case ParameterType.session:
@@ -98,8 +95,10 @@ class ParameterExtractor {
       case ParameterType.request:
         return DianaRequest.fromShelf(request);
       case ParameterType.ip:
-        return request.context['shelf.ip'] ??
-            request.headers['x-forwarded-for'];
+        return (request.context['shelf.io.connection_info']
+                as HttpConnectionInfo?)
+            ?.remoteAddress
+            .address;
       case ParameterType.host:
         return request.headers['host'] ?? request.url.host;
       default:
@@ -108,6 +107,9 @@ class ParameterExtractor {
   }
 
   static dynamic _processValue(dynamic value, Parameter param) {
+    if (value == null) {
+      return null;
+    }
     _executeValidators(param.validators, value);
     return _executeTransformers(param.transformers, value);
   }

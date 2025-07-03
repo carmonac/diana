@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import '../core/exceptions/exceptions.dart';
+import '../core/diana_config.dart';
 import '../core/handler_composer.dart';
 import '../core/utils.dart';
 import 'diana_handler_factory.dart';
@@ -9,23 +9,18 @@ import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'error_response.dart';
+import 'secure_cookie_handler.dart';
 
 class Adapter {
   final globalRouter = Router();
   final globalPipeline = Pipeline();
-  final String prefix;
-  final Middleware? errorHandler;
-  final String defaultOutputContentType;
-  final DianaHttpErrorBuilder? errorBuilder;
+  final DianaConfig dianaConfig;
 
   Adapter({
-    this.prefix = '',
-    this.errorHandler,
     GlobalComposer? globalComposer,
     List<ControllerComposer> controllers = const [],
-    this.defaultOutputContentType = 'application/json',
-    this.errorBuilder,
-  }) {
+    DianaConfig? dianaConfig,
+  }) : dianaConfig = dianaConfig ?? DianaConfig() {
     setUpGlobalPipeline(globalComposer);
     for (final controller in controllers) {
       setUpController(controller);
@@ -33,6 +28,20 @@ class Adapter {
   }
 
   void setUpGlobalPipeline([GlobalComposer? globalComposer]) {
+    // Add redirect middlewares first
+    if (dianaConfig.redirectHttpToHttps == true) {
+      globalPipeline.addMiddleware(_httpToHttpsRedirectMiddleware);
+    }
+
+    if (dianaConfig.redirectTrailingSlash == true) {
+      globalPipeline.addMiddleware(_trailingSlashRedirectMiddleware);
+    }
+
+    if (dianaConfig.cookieParserEnabled == true) {
+      final cookieHandler = SecureCookieHandler(dianaConfig.cookieSecret);
+      globalPipeline.addMiddleware(cookieHandler.middleware);
+    }
+
     globalPipeline.addMiddleware((Handler nextHandler) {
       return (Request request) async {
         final dianaRequest = DianaRequest.fromShelf(request);
@@ -42,14 +51,15 @@ class Adapter {
         return await nextHandler(modifiedRequest.shelfRequest);
       };
     });
-
-    if (errorHandler != null) {
-      globalPipeline.addMiddleware(errorHandler!);
+    if (dianaConfig.errorHandler != null) {
+      globalPipeline.addMiddleware(
+        ErrorResponse.customErrorResponse(dianaConfig.errorHandler!),
+      );
     } else {
       globalPipeline.addMiddleware(
         ErrorResponse.dianaErrorResponse(
-          defaultOutputContentType,
-          errorBuilder,
+          dianaConfig.defaultOutputContentType,
+          dianaConfig.errorBuilder,
         ),
       );
     }
@@ -168,7 +178,7 @@ class Adapter {
           ),
         );
         print(
-          'Static file server registered $prefix${controllerComposer.path}${route.path}',
+          'Static file server registered ${dianaConfig.prefix}${controllerComposer.path}${route.path}',
         );
         continue;
       }
@@ -180,14 +190,19 @@ class Adapter {
           DianaHandlerFactory.createControllerHandler(
             route.action,
             route.params,
-            outputContentType: defaultOutputContentType,
+            outputContentType: dianaConfig.defaultOutputContentType,
           ),
         ),
       );
-      print('Route registered $prefix${controllerComposer.path}${route.path}');
+      print(
+        'Route registered ${dianaConfig.prefix}${controllerComposer.path}${route.path}',
+      );
     }
 
-    globalRouter.mount(prefix + controllerComposer.path, router.call);
+    globalRouter.mount(
+      dianaConfig.prefix + controllerComposer.path,
+      router.call,
+    );
   }
 
   Future<void> runServer(host, port) async {
@@ -195,7 +210,43 @@ class Adapter {
       globalPipeline.addHandler(globalRouter.call),
       host ?? 'localhost',
       port ?? 8080,
+      securityContext: dianaConfig.securityContext,
     );
     server.autoCompress = true;
+  }
+
+  /// Middleware to redirect HTTP requests to HTTPS
+  Middleware get _httpToHttpsRedirectMiddleware {
+    return (Handler handler) {
+      return (Request request) async {
+        if (!request.requestedUri.isScheme('https')) {
+          final httpsUri = request.requestedUri.replace(scheme: 'https');
+          return Response.found(httpsUri.toString());
+        }
+        return await handler(request);
+      };
+    };
+  }
+
+  /// Middleware to redirect URLs without trailing slash to URLs with trailing slash
+  Middleware get _trailingSlashRedirectMiddleware {
+    return (Handler handler) {
+      return (Request request) async {
+        final path = request.requestedUri.path;
+
+        // Only redirect if:
+        // 1. Path doesn't end with '/'
+        // 2. Path doesn't contain a file extension (no '.' in the last segment)
+        // 3. It's a GET request (avoid redirecting POST/PUT/DELETE requests)
+        if (!path.endsWith('/') &&
+            request.method == 'GET' &&
+            !path.split('/').last.contains('.')) {
+          final redirectUri = request.requestedUri.replace(path: '$path/');
+          return Response.movedPermanently(redirectUri.toString());
+        }
+
+        return await handler(request);
+      };
+    };
   }
 }

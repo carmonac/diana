@@ -7,3 +7,4 @@ export 'annotation_options.dart';
 export 'diana_shelf_middleware.dart';
 export 'content_type.dart';
 export 'serializer.dart';
+export 'diana_error_handler.dart';

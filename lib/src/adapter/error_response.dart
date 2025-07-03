@@ -4,6 +4,7 @@ import 'package:shelf/shelf.dart';
 import '../core/base/base.dart';
 import '../core/content_type_registry.dart';
 import '../core/exceptions/exceptions.dart';
+import 'request.dart';
 import 'response.dart';
 
 class ErrorResponse {
@@ -120,5 +121,22 @@ class ErrorResponse {
     }
 
     return baseResponse;
+  }
+
+  static Middleware customErrorResponse(DianaErrorHandler errorHandler) {
+    return (Handler innerHandler) {
+      return (Request request) async {
+        try {
+          return await innerHandler(request);
+        } catch (error, stackTrace) {
+          final errorResponse = await errorHandler.handle(
+            error,
+            stackTrace,
+            DianaRequest.fromShelf(request),
+          );
+          return errorResponse.shelfResponse;
+        }
+      };
+    };
   }
 }

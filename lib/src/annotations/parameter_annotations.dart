@@ -77,6 +77,6 @@ class FileParam extends ComplexParam {
     : super(type: ParameterType.file);
 }
 
-class Cookie extends SimpleParam {
-  const Cookie([String? key]) : super(type: ParameterType.cookie, key: key);
+class CookieHandler extends SimpleParam {
+  const CookieHandler() : super(type: ParameterType.cookie);
 }
