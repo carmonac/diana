@@ -65,7 +65,7 @@ class HostParam extends SimpleParam {
 }
 
 class Session extends SimpleParam {
-  const Session([String? key]) : super(type: ParameterType.session, key: key);
+  const Session() : super(type: ParameterType.session);
 }
 
 class Header extends SimpleParam {
