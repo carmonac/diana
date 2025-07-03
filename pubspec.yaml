@@ -1,5 +1,5 @@
 name: diana
-description: A starting point for Dart libraries or applications.
+description: A backend framework written in Dart.
 version: 0.0.1
 repository: https://github.com/carmonac/diana
 environment:
