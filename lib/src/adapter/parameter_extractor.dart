@@ -10,6 +10,7 @@ import '../core/type_converter.dart';
 import '../core/parameter_type.dart';
 import 'request.dart';
 import 'secure_cookie_handler.dart';
+import 'secure_session_handler.dart';
 
 class ParameterExtractor {
   static Future<List<dynamic>> extractParametersAsync(
@@ -80,18 +81,11 @@ class ParameterExtractor {
         Object obj = await BodyParser.parseBodyParameter(request, param);
         return _processValue(obj, param);
       case ParameterType.cookie:
-        SecureCookieHandler cookieHandler =
-            request.context['cookie_handler'] as SecureCookieHandler;
-        return cookieHandler;
+        return request.context['cookie_handler'] as SecureCookieHandler;
       case ParameterType.file:
         return await FileParser.parseFileParameter(request, param);
       case ParameterType.session:
-        final session =
-            request.context['shelf.session'] as Map<String, dynamic>?;
-        if (param.name == null) {
-          return session;
-        }
-        return session?[param.name];
+        return SecureSessionHandler.getSession(request);
       case ParameterType.request:
         return DianaRequest.fromShelf(request);
       case ParameterType.ip:

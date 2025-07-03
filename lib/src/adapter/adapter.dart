@@ -10,6 +10,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
 import 'error_response.dart';
 import 'secure_cookie_handler.dart';
+import 'secure_session_handler.dart';
 
 class Adapter {
   final globalRouter = Router();
@@ -40,6 +41,14 @@ class Adapter {
     if (dianaConfig.cookieParserEnabled == true) {
       final cookieHandler = SecureCookieHandler(dianaConfig.cookieSecret);
       globalPipeline.addMiddleware(cookieHandler.middleware);
+    }
+
+    if (dianaConfig.sessionConfig != null) {
+      final sessionHandler = SecureSessionHandler(
+        dianaConfig.cookieSecret,
+        config: dianaConfig.sessionConfig!,
+      );
+      globalPipeline.addMiddleware(sessionHandler.middleware);
     }
 
     globalPipeline.addMiddleware((Handler nextHandler) {

@@ -29,8 +29,10 @@ class CookieData {
 
 /// A secure cookie handler that encrypts and signs cookie values
 class SecureCookieHandler {
+  Map<String, String> _cookies = <String, String>{};
   final String _secretKey;
   final Random _random = Random.secure();
+  List<String> cookieHeaders = <String>[];
 
   SecureCookieHandler(this._secretKey) {
     if (_secretKey.length < 32) {
@@ -42,10 +44,18 @@ class SecureCookieHandler {
   Middleware get middleware {
     return (Handler innerHandler) {
       return (Request request) async {
+        _cookies = _parseCookies(request);
         final modifiedRequest = request.change(
           context: {'cookie_handler': this, ...request.context},
         );
-        return await innerHandler(modifiedRequest);
+        final response = await innerHandler(modifiedRequest);
+        if (cookieHeaders.isNotEmpty) {
+          final newHeaders = Map<String, Object>.from(response.headers);
+          newHeaders['set-cookie'] = cookieHeaders;
+          response.change(headers: newHeaders);
+          cookieHeaders.clear();
+        }
+        return response;
       };
     };
   }
@@ -73,14 +83,13 @@ class SecureCookieHandler {
   }
 
   /// Get a plain cookie value
-  String? getCookie(Request request, String name) {
-    final cookies = _parseCookies(request);
-    return cookies[name];
+  String? get(String name) {
+    return _cookies[name];
   }
 
   /// Get an encrypted cookie value and decrypt it
-  String? getEncryptedCookie(Request request, String name) {
-    final encryptedValue = getCookie(request, name);
+  String? getEncrypted(String name) {
+    final encryptedValue = get(name);
     if (encryptedValue == null) {
       return null;
     }
@@ -93,10 +102,7 @@ class SecureCookieHandler {
     }
   }
 
-  /// SOLUCION AL PROBLEMA: Set multiple cookies at once
-  Response setAllCookies(Response response, Map<String, CookieData> cookies) {
-    final cookieHeaders = <String>[];
-
+  void set(Map<String, CookieData> cookies) {
     for (final entry in cookies.entries) {
       final name = entry.key;
       final data = entry.value;
@@ -121,13 +127,7 @@ class SecureCookieHandler {
 
       cookieHeaders.add(cookieHeader);
     }
-
     print('Setting ${cookieHeaders.length} cookies at once');
-
-    final newHeaders = Map<String, Object>.from(response.headers);
-    newHeaders['set-cookie'] = cookieHeaders;
-
-    return response.change(headers: newHeaders);
   }
 
   /// Encrypt a value using simple encryption with HMAC signature
