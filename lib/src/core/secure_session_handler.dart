@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
-import 'package:shelf/shelf.dart';
-import '../core/session_config.dart';
+
+import 'package:diana/src/core/session_config.dart';
+import 'package:diana/src/http/interfaces.dart';
 
 /// Session data container
 class SessionData {
@@ -86,9 +88,9 @@ class SecureSessionHandler {
   }
 
   /// Creates a middleware that adds session functionality to requests
-  Middleware get middleware {
-    return (Handler innerHandler) {
-      return (Request request) async {
+  DianaMiddleware get middleware {
+    return (DianaHandler innerHandler) {
+      return (DianaRequest request) async {
         // Get or create session
         final sessionData = _getOrCreateSession(request);
 
@@ -111,12 +113,12 @@ class SecureSessionHandler {
   }
 
   /// Get session from request context
-  static SessionData? getSession(Request request) {
-    return request.context['session'] as SessionData?;
+  static SessionData? getSession(DianaRequest request) {
+    return request.getContext('session') as SessionData?;
   }
 
   /// Get or create a session for the request
-  SessionData _getOrCreateSession(Request request) {
+  SessionData _getOrCreateSession(DianaRequest request) {
     final sessionId = _getSessionId(request);
 
     if (sessionId != null && _sessions.containsKey(sessionId)) {
@@ -132,7 +134,7 @@ class SecureSessionHandler {
   }
 
   /// Get session ID from request cookie
-  String? _getSessionId(Request request) {
+  String? _getSessionId(DianaRequest request) {
     final cookieHeader = request.headers['cookie'];
 
     if (cookieHeader == null || cookieHeader.isEmpty) {
@@ -166,7 +168,10 @@ class SecureSessionHandler {
   }
 
   /// Save session if it was modified
-  Response _saveSessionIfNeeded(Response response, SessionData session) {
+  DianaResponse _saveSessionIfNeeded(
+    DianaResponse response,
+    SessionData session,
+  ) {
     // If session is not modified and not empty, don't save
     if (!session.isModified && session.toMap().isNotEmpty) {
       return response;
@@ -208,7 +213,7 @@ class SecureSessionHandler {
   }
 
   /// Set session cookie in response
-  Response _setSessionCookie(Response response, String sessionData) {
+  DianaResponse _setSessionCookie(DianaResponse response, String sessionData) {
     final cookieValue = _buildCookieHeader(
       _config.cookieName,
       sessionData,
@@ -235,7 +240,7 @@ class SecureSessionHandler {
   }
 
   /// Clear session cookie
-  Response _clearSessionCookie(Response response) {
+  DianaResponse _clearSessionCookie(DianaResponse response) {
     final cookieValue = _buildCookieHeader(
       _config.cookieName,
       '',

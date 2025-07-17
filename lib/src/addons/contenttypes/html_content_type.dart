@@ -3,7 +3,7 @@ import 'package:diana/diana.dart';
 /// In case you want to return a html (for example a jinja template file generated, this class should be used)
 /// For other types like text/css or application/javascipr, use static folder.
 @ContentTypeSerializer(['text/html', 'application/xhtml+xml'])
-class HtmlContentType extends ContentType with Serializable {
+class HtmlContentType extends AbstractContentType with Serializable {
   HtmlContentType(super.contentType);
 
   @override

@@ -3,25 +3,37 @@ import 'dart:async';
 import '../core/diana_config.dart';
 import '../core/handler_composer.dart';
 import '../core/utils.dart';
-import 'diana_handler_factory.dart';
-import 'request.dart';
+import '../http/interfaces.dart';
+import '../core/diana_handler_factory.dart';
+import 'shelf/shelf_response_factory.dart';
+import 'shelf/shelf_static_file_server_factory.dart';
+import '../core/response_factory_registry.dart';
 import 'package:shelf/shelf_io.dart' as io;
 import 'package:shelf/shelf.dart';
 import 'package:shelf_router/shelf_router.dart';
-import 'error_response.dart';
-import 'secure_cookie_handler.dart';
-import 'secure_session_handler.dart';
+import 'shelf/shelf_error_response.dart';
+import '../core/secure_cookie_handler.dart';
+import '../core/secure_session_handler.dart';
 
 class Adapter {
   final globalRouter = Router();
   final globalPipeline = Pipeline();
   final DianaConfig dianaConfig;
+  final DianaResponseFactory responseFactory;
+  final DianaStaticFileServerFactory staticFileServerFactory;
 
   Adapter({
     GlobalComposer? globalComposer,
     List<ControllerComposer> controllers = const [],
     DianaConfig? dianaConfig,
-  }) : dianaConfig = dianaConfig ?? DianaConfig() {
+    DianaResponseFactory? responseFactory,
+    DianaStaticFileServerFactory? staticFileServerFactory,
+  }) : dianaConfig = dianaConfig ?? DianaConfig(),
+       responseFactory = responseFactory ?? ShelfResponseFactory(),
+       staticFileServerFactory =
+           staticFileServerFactory ?? ShelfStaticFileServerFactory() {
+    // Configure the global response factory registry
+    ResponseFactoryRegistry.setFactory(this.responseFactory);
     setUpGlobalPipeline(globalComposer);
     for (final controller in controllers) {
       setUpController(controller);
@@ -62,11 +74,11 @@ class Adapter {
     });
     if (dianaConfig.errorHandler != null) {
       globalPipeline.addMiddleware(
-        ErrorResponse.customErrorResponse(dianaConfig.errorHandler!),
+        ShelfErrorResponse.customErrorResponse(dianaConfig.errorHandler!),
       );
     } else {
       globalPipeline.addMiddleware(
-        ErrorResponse.dianaErrorResponse(
+        ShelfErrorResponse.dianaErrorResponse(
           dianaConfig.defaultOutputContentType,
           dianaConfig.errorBuilder,
         ),
@@ -78,28 +90,28 @@ class Adapter {
     }
     for (final component in globalComposer.components) {
       switch (component.type.toString()) {
-        case 'DianaGuard':
+        case 'AbstractGuard':
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createGuard(
               (component as GuardComponent).guard,
             ),
           );
           break;
-        case 'DianaMiddleware':
+        case 'AbstractMiddleware':
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createMiddleware(
               (component as MiddlewareComponent).middleware,
             ),
           );
           break;
-        case 'DianaInterceptor':
+        case 'AbstractInterceptor':
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createInterceptor(
               (component as InterceptorComponent).interceptor,
             ),
           );
           break;
-        case 'DianaShelfMiddleware':
+        case 'AbstractShelfMiddleware':
           globalPipeline.addMiddleware(
             DianaHandlerFactory.createShelfMiddleware(
               (component as ShelfMiddlewareComponent).dianaShelfMiddleware,
@@ -115,28 +127,28 @@ class Adapter {
     final Pipeline pipeline = Pipeline();
     for (final component in controllerComposer.components) {
       switch (component.type.toString()) {
-        case 'DianaGuard':
+        case 'AbstractGuard':
           pipeline.addMiddleware(
             DianaHandlerFactory.createGuard(
               (component as GuardComponent).guard,
             ),
           );
           break;
-        case 'DianaMiddleware':
+        case 'AbstractMiddleware':
           pipeline.addMiddleware(
             DianaHandlerFactory.createMiddleware(
               (component as MiddlewareComponent).middleware,
             ),
           );
           break;
-        case 'DianaInterceptor':
+        case 'AbstractInterceptor':
           pipeline.addMiddleware(
             DianaHandlerFactory.createInterceptor(
               (component as InterceptorComponent).interceptor,
             ),
           );
           break;
-        case 'DianaShelfMiddleware':
+        case 'AbstractShelfMiddleware':
           pipeline.addMiddleware(
             DianaHandlerFactory.createShelfMiddleware(
               (component as ShelfMiddlewareComponent).dianaShelfMiddleware,
@@ -148,28 +160,28 @@ class Adapter {
     for (final route in controllerComposer.routes) {
       for (final component in route.components) {
         switch (component.type.toString()) {
-          case 'DianaGuard':
+          case 'AbstractGuard':
             pipeline.addMiddleware(
               DianaHandlerFactory.createGuard(
                 (component as GuardComponent).guard,
               ),
             );
             break;
-          case 'DianaMiddleware':
+          case 'AbstractMiddleware':
             pipeline.addMiddleware(
               DianaHandlerFactory.createMiddleware(
                 (component as MiddlewareComponent).middleware,
               ),
             );
             break;
-          case 'DianaInterceptor':
+          case 'AbstractInterceptor':
             pipeline.addMiddleware(
               DianaHandlerFactory.createInterceptor(
                 (component as InterceptorComponent).interceptor,
               ),
             );
             break;
-          case 'DianaShelfMiddleware':
+          case 'AbstractShelfMiddleware':
             pipeline.addMiddleware(
               DianaHandlerFactory.createShelfMiddleware(
                 (component as ShelfMiddlewareComponent).dianaShelfMiddleware,
@@ -183,7 +195,10 @@ class Adapter {
         router.all(
           route.path,
           pipeline.addHandler(
-            DianaHandlerFactory.createStaticFileServer(route.staticOptions!),
+            DianaHandlerFactory.createStaticFileServer(
+              route.staticOptions!,
+              staticFileServerFactory,
+            ),
           ),
         );
         print(
@@ -200,6 +215,7 @@ class Adapter {
             route.action,
             route.params,
             outputContentType: dianaConfig.defaultOutputContentType,
+            responseFactory: responseFactory,
           ),
         ),
       );

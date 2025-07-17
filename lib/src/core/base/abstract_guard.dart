@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import '../../adapter/request.dart';
+import '../../http/interfaces.dart';
 
-abstract class DianaGuard {
+abstract class AbstractGuard {
   FutureOr<bool> canActivate(DianaRequest request);
 }

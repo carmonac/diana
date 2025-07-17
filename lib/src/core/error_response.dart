@@ -1,19 +1,20 @@
 import 'dart:io';
 
-import 'package:shelf/shelf.dart';
-import '../core/base/base.dart';
-import '../core/content_type_registry.dart';
-import '../core/exceptions/exceptions.dart';
-import 'request.dart';
-import 'response.dart';
+import 'package:diana/src/core/base/abstract_error_handler.dart';
+import 'package:diana/src/core/base/base.dart';
+import 'package:diana/src/core/content_type_registry.dart';
+import 'package:diana/src/core/exceptions/exceptions.dart';
+import 'package:diana/src/core/response_factory_registry.dart';
+import 'package:diana/src/http/interfaces.dart';
 
 class ErrorResponse {
-  static Middleware dianaErrorResponse(
+  /// Creates a framework-agnostic error middleware
+  static DianaMiddleware dianaErrorResponse(
     String outputContentType, [
     DianaHttpErrorBuilder? errorBuilder,
   ]) {
-    return (Handler innerHandler) {
-      return (Request request) async {
+    return (DianaHandler innerHandler) {
+      return (DianaRequest request) async {
         try {
           return await innerHandler(request);
         } on DianaHttpException catch (dianaHttpException) {
@@ -24,70 +25,70 @@ class ErrorResponse {
             errorBuilder,
           );
         } on HttpException catch (httpException) {
-          return DianaResponse.text(
-            {
+          return ResponseFactoryRegistry.factory.create(
+            statusCode: 500,
+            body: {
               'error': true,
               'message': httpException.message,
               'statusCode': 500,
               'timestamp': DateTime.now().toIso8601String(),
             }.toString(),
-            statusCode: 500,
             headers: _getHeaders(request),
-          ).shelfResponse;
+          );
         } catch (error, stackTrace) {
           // Log the error or handle it as needed
           print('Error occurred: $error: $stackTrace');
-          return DianaResponse.text(
-            {
+          return ResponseFactoryRegistry.factory.create(
+            statusCode: 500,
+            body: {
               'error': true,
               'message': 'Internal Server Error',
               'statusCode': 500,
               'timestamp': DateTime.now().toIso8601String(),
               'details': error.toString(),
             }.toString(),
-            statusCode: 500,
             headers: _getHeaders(request),
-          ).shelfResponse;
+          );
         }
       };
     };
   }
 
-  static Map<String, String> _getHeaders(Request request) {
+  static Map<String, String> _getHeaders(DianaRequest request) {
     return {
       'X-Request-ID': request.context['request_id']?.toString() ?? '',
       'error': 'true',
     };
   }
 
-  static Response _handleDianaHttpException(
+  static DianaResponse _handleDianaHttpException(
     DianaHttpException exception,
-    Request request,
+    DianaRequest request,
     String outputContentType,
     dynamic Function(DianaHttpException)? errorBuilder,
   ) {
-    final acceptType = request.headers['accept'] ?? outputContentType;
+    final acceptType = request.header('accept') ?? outputContentType;
     final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
       acceptType,
     );
     if (acceptType.contains('text/plain') ||
         contentTypeHandler == null ||
         contentTypeHandler is! Serializable) {
-      return DianaResponse.text(
-        _createResponseBody(exception, true),
+      return ResponseFactoryRegistry.factory.create(
         statusCode: exception.statusCode,
+        body: _createResponseBody(exception, true),
         headers: _getHeaders(request),
-      ).shelfResponse;
+      );
     }
 
     final responseBody = errorBuilder != null
         ? errorBuilder(exception)
         : _createResponseBody(exception, false);
-    return DianaResponse(
-      exception.statusCode,
+    return ResponseFactoryRegistry.factory.create(
+      statusCode: exception.statusCode,
       body: (contentTypeHandler as Serializable).serialize(responseBody),
       headers: {'Content-Type': acceptType, ..._getHeaders(request)},
-    ).shelfResponse;
+    );
   }
 
   static dynamic _createResponseBody(
@@ -123,18 +124,16 @@ class ErrorResponse {
     return baseResponse;
   }
 
-  static Middleware customErrorResponse(DianaErrorHandler errorHandler) {
-    return (Handler innerHandler) {
-      return (Request request) async {
+  /// Creates a framework-agnostic custom error middleware
+  static DianaMiddleware customErrorResponse(
+    AbstractErrorHandler errorHandler,
+  ) {
+    return (DianaHandler innerHandler) {
+      return (DianaRequest request) async {
         try {
           return await innerHandler(request);
         } catch (error, stackTrace) {
-          final errorResponse = await errorHandler.handle(
-            error,
-            stackTrace,
-            DianaRequest.fromShelf(request),
-          );
-          return errorResponse.shelfResponse;
+          return await errorHandler.handle(error, stackTrace, request);
         }
       };
     };

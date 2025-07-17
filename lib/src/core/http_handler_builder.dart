@@ -1,18 +1,19 @@
-import 'package:shelf/shelf.dart';
-import 'package:shelf_static/shelf_static.dart';
-import '../core/handler_composer.dart';
+import 'package:diana/src/core/action_invoker.dart';
+import 'package:diana/src/core/handler_composer.dart';
+import 'package:diana/src/http/interfaces.dart';
+
 import 'parameter_extractor.dart';
 import 'response_processor.dart';
-import '../core/action_invoker.dart';
 
-class ControllerHandlerFactory {
-  static Handler createOptimizedHandler<T extends Function>(
+class DianaHandlerBuilder {
+  static DianaHandler buildOptimizedHandler<T extends Function>(
     T action,
     List<dynamic> params, {
     required String outputContentType, // Default output content type
+    required DianaResponseFactory responseFactory,
   }) {
-    return (Request request) async {
-      final acceptType = request.headers['accept'] ?? outputContentType;
+    return (DianaRequest request) async {
+      final acceptType = request.header('accept') ?? outputContentType;
 
       final parameterObjects = params.whereType<Parameter>().toList();
       dynamic responseFromController;
@@ -42,15 +43,16 @@ class ControllerHandlerFactory {
           );
       }
 
-      return (ResponseProcessor.processResponse(
+      return ResponseProcessor.processResponse(
         responseFromController,
         acceptType,
-      )).shelfResponse;
+        responseFactory,
+      );
     };
   }
 
   static Future<dynamic> _createHandler<T extends Function>(
-    Request request,
+    DianaRequest request,
     T action,
     List<dynamic> params,
   ) async {
@@ -67,7 +69,7 @@ class ControllerHandlerFactory {
   }
 
   static Future<R> _createTypedHandler1<R, T1>(
-    Request request,
+    DianaRequest request,
     Future<R> Function(T1) action,
     Parameter param1,
   ) async {
@@ -79,7 +81,7 @@ class ControllerHandlerFactory {
   }
 
   static Future<R> _createTypedHandler2<R, T1, T2>(
-    Request request,
+    DianaRequest request,
     Future<R> Function(T1, T2) action,
     Parameter param1,
     Parameter param2,
@@ -95,15 +97,18 @@ class ControllerHandlerFactory {
     return await action(arg1, arg2);
   }
 
-  static Handler createStaticFileServerHandler(
+  static DianaHandler buildStaticFileServerHandler(
     String localPath, {
     String? defaultDocument,
     bool listDirectory = false,
+    required DianaStaticFileServerFactory staticFileServerFactory,
   }) {
-    return createStaticHandler(
-      localPath,
+    final config = StaticFileServerConfig(
+      localPath: localPath,
       defaultDocument: defaultDocument,
       listDirectories: listDirectory,
     );
+
+    return staticFileServerFactory.createStaticFileServer(config);
   }
 }

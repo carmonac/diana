@@ -4,7 +4,8 @@ import 'dart:convert';
 import 'package:diana/diana.dart';
 
 @ContentTypeSerializer(['application/json', 'text/json'])
-class JsonContentType extends ContentType with Serializable, Deserializable {
+class JsonContentType extends AbstractContentType
+    with Serializable, Deserializable {
   JsonContentType(super.contentTypes);
 
   @override

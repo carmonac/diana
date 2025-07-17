@@ -1,8 +1,10 @@
 import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
+
 import 'package:crypto/crypto.dart';
-import 'package:shelf/shelf.dart';
+
+import 'package:diana/src/http/interfaces.dart';
 
 /// Configuration for a cookie
 class CookieData {
@@ -41,9 +43,9 @@ class SecureCookieHandler {
   }
 
   /// Creates a middleware that adds secure cookie functionality to requests
-  Middleware get middleware {
-    return (Handler innerHandler) {
-      return (Request request) async {
+  DianaMiddleware get middleware {
+    return (DianaHandler innerHandler) {
+      return (DianaRequest request) async {
         _cookies = _parseCookies(request);
         final modifiedRequest = request.change(
           context: {'cookie_handler': this, ...request.context},
@@ -61,7 +63,7 @@ class SecureCookieHandler {
   }
 
   /// Parse cookie header string into a map
-  Map<String, String> _parseCookies(Request request) {
+  Map<String, String> _parseCookies(DianaRequest request) {
     final cookies = <String, String>{};
     final cookieHeader = request.headers['cookie'];
 

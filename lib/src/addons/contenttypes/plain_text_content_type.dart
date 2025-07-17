@@ -1,7 +1,7 @@
 import 'package:diana/diana.dart';
 
 @ContentTypeSerializer(['text/plain'])
-class PlainTextContentType extends ContentType
+class PlainTextContentType extends AbstractContentType
     with Serializable, Deserializable {
   PlainTextContentType(super.contentTypes);
 

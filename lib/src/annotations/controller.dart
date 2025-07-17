@@ -1,3 +1,5 @@
+import 'package:diana/src/core/version.dart';
+
 /// this is the controller annotation
 /// It is used to mark classes as controllers.
 /// Controllers are typically used in the context of MVC (Model-View-Controller)
@@ -15,7 +17,9 @@ class Controller {
   /// The [path] parameter specifies the URL path that this controller will respond to.
   /// If no path is provided, it defaults to '/'.
   final String path;
-  const Controller([this.path = '/']);
+  final String? description;
+  final Version? version;
+  const Controller({this.path = '/', this.version, this.description});
 
   /// Returns a hash code for the controller annotation.
   @override
