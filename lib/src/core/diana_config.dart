@@ -1,13 +1,14 @@
 import 'dart:io';
 
-import 'session_config.dart';
+import 'package:diana/src/core/base/abstract_error_handler.dart';
+import 'package:diana/src/core/http_lib.dart';
 
-import 'base/base.dart';
+import 'session_config.dart';
 
 import 'exceptions/diana_http_exception.dart';
 
 class DianaConfig {
-  final DianaErrorHandler? errorHandler;
+  final AbstractErrorHandler? errorHandler;
   final String prefix;
   final DianaHttpErrorBuilder? errorBuilder;
   final SecurityContext? securityContext;
@@ -17,6 +18,7 @@ class DianaConfig {
   final String defaultOutputContentType;
   final String cookieSecret;
   final SessionConfig? sessionConfig;
+  final HttpLib httpLib;
 
   DianaConfig({
     this.errorHandler,
@@ -29,5 +31,6 @@ class DianaConfig {
     this.defaultOutputContentType = 'application/json',
     this.cookieSecret = '12345678901234567890123456789012',
     this.sessionConfig,
+    this.httpLib = HttpLib.shelf,
   });
 }

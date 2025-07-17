@@ -1,20 +1,20 @@
-import 'dart:io';
+import 'dart:io' as io;
 
-import '../core/exceptions/exceptions.dart';
-import 'package:shelf/shelf.dart';
+import 'package:diana/src/core/base/base.dart';
+import 'package:diana/src/core/exceptions/exceptions.dart';
+import 'package:diana/src/core/handler_composer.dart';
+import 'package:diana/src/core/parameter_type.dart';
+import 'package:diana/src/core/type_converter.dart';
+import 'package:diana/src/http/interfaces.dart';
+
 import 'body_parser.dart';
 import 'file_parser.dart';
-import '../core/base/base.dart';
-import '../core/handler_composer.dart';
-import '../core/type_converter.dart';
-import '../core/parameter_type.dart';
-import 'request.dart';
 import 'secure_cookie_handler.dart';
 import 'secure_session_handler.dart';
 
 class ParameterExtractor {
   static Future<List<dynamic>> extractParametersAsync(
-    Request request,
+    DianaRequest request,
     List<dynamic> params,
   ) async {
     final extractedArgs = <dynamic>[];
@@ -32,7 +32,7 @@ class ParameterExtractor {
   }
 
   static Future<T> extractSingleParameterAsync<T>(
-    Request request,
+    DianaRequest request,
     Parameter param,
   ) async {
     final value = await _extractParameterValue(request, param);
@@ -45,7 +45,7 @@ class ParameterExtractor {
   }
 
   static Future<dynamic> _extractParameterValue(
-    Request request,
+    DianaRequest request,
     Parameter param,
   ) async {
     switch (param.type) {
@@ -58,18 +58,9 @@ class ParameterExtractor {
         return _processValue(params?[param.name], param);
       case ParameterType.query:
         if (param.name == null) {
-          return _processValue(request.url.queryParameters, param);
+          return _processValue(request.queryParametersAll, param);
         }
-        return _processValue(request.url.queryParameters[param.name], param);
-
-      case ParameterType.queryList:
-        if (param.name == null) {
-          return _processValue(request.url.queryParametersAll, param);
-        }
-        return _processValue(
-          request.url.queryParametersAll[param.name] ?? [],
-          param,
-        );
+        return _processValue(request.queryParameters[param.name], param);
 
       case ParameterType.header:
         if (param.name == null) {
@@ -81,20 +72,19 @@ class ParameterExtractor {
         Object obj = await BodyParser.parseBodyParameter(request, param);
         return _processValue(obj, param);
       case ParameterType.cookie:
-        return request.context['cookie_handler'] as SecureCookieHandler;
+        return request.getContext('cookie_handler') as SecureCookieHandler;
       case ParameterType.file:
         return await FileParser.parseFileParameter(request, param);
       case ParameterType.session:
         return SecureSessionHandler.getSession(request);
       case ParameterType.request:
-        return DianaRequest.fromShelf(request);
+        return request;
       case ParameterType.ip:
-        return (request.context['shelf.io.connection_info']
-                as HttpConnectionInfo?)
-            ?.remoteAddress
+        return (request.connectionInfo() as io.HttpConnectionInfo)
+            .remoteAddress
             .address;
       case ParameterType.host:
-        return request.headers['host'] ?? request.url.host;
+        return request.host;
       default:
         return null;
     }
@@ -109,7 +99,7 @@ class ParameterExtractor {
   }
 
   static void _executeValidators(
-    List<DianaValidator>? validators,
+    List<AbstractValidator>? validators,
     dynamic value,
   ) async {
     if (validators == null || validators.isEmpty) {
@@ -124,7 +114,7 @@ class ParameterExtractor {
   }
 
   static Object _executeTransformers(
-    List<DianaTransformer>? transformers,
+    List<AbstractTransformer>? transformers,
     Object value,
   ) {
     if (transformers == null || transformers.isEmpty) {

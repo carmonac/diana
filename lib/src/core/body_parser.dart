@@ -1,15 +1,14 @@
-import 'package:diana/src/adapter/request.dart';
-import 'package:shelf/shelf.dart';
-import '../core/base/base.dart';
-import '../core/content_type_registry.dart';
-import '../core/handler_composer.dart';
+import 'package:diana/src/http/interfaces.dart';
+import 'base/base.dart';
+import 'content_type_registry.dart';
+import 'handler_composer.dart';
 
 class BodyParser {
   static Future<Object> parseBodyParameter(
-    Request request,
+    DianaRequest request,
     Parameter param,
   ) async {
-    final contentType = request.headers['content-type'] ?? 'text/plain';
+    final contentType = request.contentType ?? 'text/plain';
     final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
       contentType,
     );
@@ -20,9 +19,8 @@ class BodyParser {
       throw Exception('Content type handler does not support deserialization');
     }
 
-    final DianaRequest dianaRequest = DianaRequest.fromShelf(request);
     final bodyObject = await (contentTypeHandler as Deserializable).deserialize(
-      dianaRequest,
+      request,
       param.typeOf!,
     );
 
@@ -30,10 +28,10 @@ class BodyParser {
   }
 
   static Future<List<Object>> parseBodyListParameter(
-    Request request,
+    DianaRequest request,
     Parameter param,
   ) async {
-    final contentType = request.headers['content-type'] ?? 'text/plain';
+    final contentType = request.contentType ?? 'text/plain';
     final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
       contentType,
     );
@@ -44,9 +42,8 @@ class BodyParser {
       throw Exception('Content type handler does not support deserialization');
     }
 
-    final DianaRequest dianaRequest = DianaRequest.fromShelf(request);
     final bodyListObject = await (contentTypeHandler as Deserializable)
-        .deserialize(dianaRequest, List<Object>);
+        .deserialize(request, List<Object>);
 
     return bodyListObject;
   }

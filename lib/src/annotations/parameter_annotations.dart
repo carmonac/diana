@@ -6,9 +6,9 @@ abstract class BaseParameterAnnotation {
 
   final String? key;
 
-  final List<DianaTransformer<dynamic, dynamic>>? transforms;
+  final List<AbstractTransformer<dynamic, dynamic>>? transforms;
 
-  final List<DianaValidator>? validators;
+  final List<AbstractValidator>? validators;
 
   const BaseParameterAnnotation({
     required this.type,
@@ -34,11 +34,6 @@ abstract class ComplexParam extends BaseParameterAnnotation {
 class Query extends ComplexParam {
   const Query({super.key, super.validators, super.transforms})
     : super(type: ParameterType.query);
-}
-
-class QueryList extends ComplexParam {
-  const QueryList({super.key, super.transforms, super.validators})
-    : super(type: ParameterType.queryList);
 }
 
 class Param extends ComplexParam {

@@ -1,5 +1,5 @@
 import 'package:shelf/shelf.dart';
 
-abstract class DianaShelfMiddleware {
+abstract class AbstractShelfMiddleware {
   Middleware adapter();
 }

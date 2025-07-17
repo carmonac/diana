@@ -1,4 +1,6 @@
-import 'http_method.dart';
+import 'package:diana/src/core/version.dart';
+
+import '../http/http_method.dart';
 import 'parameter_type.dart';
 import 'base/base.dart';
 import 'static_options.dart';
@@ -8,47 +10,49 @@ sealed class HandlerComponent {
 }
 
 class InterceptorComponent extends HandlerComponent {
-  final DianaInterceptor interceptor;
+  final AbstractInterceptor interceptor;
 
   InterceptorComponent(this.interceptor);
 
   @override
-  Type get type => DianaInterceptor;
+  Type get type => AbstractInterceptor;
 }
 
 class GuardComponent extends HandlerComponent {
-  final DianaGuard guard;
+  final AbstractGuard guard;
 
   GuardComponent(this.guard);
 
   @override
-  Type get type => DianaGuard;
+  Type get type => AbstractGuard;
 }
 
 class MiddlewareComponent extends HandlerComponent {
-  final DianaMiddleware middleware;
+  final AbstractMiddleware middleware;
 
   MiddlewareComponent(this.middleware);
 
   @override
-  Type get type => DianaMiddleware;
+  Type get type => AbstractMiddleware;
 }
 
 class ShelfMiddlewareComponent extends HandlerComponent {
-  final DianaShelfMiddleware dianaShelfMiddleware;
+  final AbstractShelfMiddleware dianaShelfMiddleware;
 
   ShelfMiddlewareComponent(this.dianaShelfMiddleware);
 
   @override
-  Type get type => DianaShelfMiddleware;
+  Type get type => AbstractShelfMiddleware;
 }
 
 class ControllerComposer {
   final String path;
   final List<HandlerComponent> _components = [];
   final List<ControllerRouteComposer> _routes = [];
+  final Version? version;
+  final String? description;
 
-  ControllerComposer(this.path);
+  ControllerComposer(this.path, this.version, this.description);
 
   void addComponent(HandlerComponent componentObject) {
     _components.add(componentObject);
@@ -66,8 +70,8 @@ class Parameter {
   final String? name;
   final Type? typeOf;
   final ParameterType type;
-  final List<DianaValidator>? validators;
-  final List<DianaTransformer>? transformers;
+  final List<AbstractValidator>? validators;
+  final List<AbstractTransformer>? transformers;
 
   Parameter({
     this.name,
@@ -83,6 +87,8 @@ class ControllerRouteComposer<T extends Function> {
   final HttpMethod method;
   final T action;
   final bool isStaticFileServer;
+  final Version? version;
+  final String? description;
 
   /// If true, this route will serve static files.
   final StaticOptions? staticOptions;
@@ -97,6 +103,8 @@ class ControllerRouteComposer<T extends Function> {
     this.params = const [],
     this.isStaticFileServer = false,
     this.staticOptions,
+    this.version,
+    this.description,
   });
 
   void addComponent(HandlerComponent componentObject) {
