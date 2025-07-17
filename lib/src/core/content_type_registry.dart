@@ -2,15 +2,17 @@ import 'base/base.dart';
 
 class ContentTypeRegistry {
   // Map initialized with default contentTypeControllers
-  static final Map<String, ContentType> contentTypeControllers = {};
+  static final Map<String, AbstractContentType> contentTypeControllers = {};
 
-  static void registerContentTypeObject<T extends ContentType>(T ctype) {
+  static void registerContentTypeObject<T extends AbstractContentType>(
+    T ctype,
+  ) {
     for (String contentTypeDesc in ctype.contentTypes) {
       contentTypeControllers[contentTypeDesc] = ctype;
     }
   }
 
-  static ContentType? getContentTypeHandler(String contentType) {
+  static AbstractContentType? getContentTypeHandler(String contentType) {
     final key = _parseAcceptHeader(contentType) ?? contentType;
     return contentTypeControllers[key] ?? contentTypeControllers['text/plain'];
   }

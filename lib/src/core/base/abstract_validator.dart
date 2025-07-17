@@ -1,5 +1,5 @@
 import 'dart:async';
 
-abstract class DianaValidator<T> {
+abstract class AbstractValidator<T> {
   FutureOr<(bool, String)> isValid(T value);
 }

@@ -1,7 +1,6 @@
-import '../../adapter/request.dart';
-import '../../adapter/response.dart';
+import '../../http/interfaces.dart';
 
-abstract class DianaInterceptor {
+abstract class AbstractInterceptor {
   Future<void> onRequest(DianaRequest request) async {}
   Future<void> onResponse(DianaResponse response) async {}
 }

@@ -1,17 +1,16 @@
-import '../core/base/base.dart';
-import '../core/content_type_registry.dart';
-import 'package:shelf/shelf.dart';
-import '../core/file_data.dart';
-import '../core/handler_composer.dart';
-import 'request.dart';
+import 'package:diana/src/core/base/base.dart';
+import 'package:diana/src/core/content_type_registry.dart';
+import 'package:diana/src/core/file_data.dart';
+import 'package:diana/src/core/handler_composer.dart';
+import 'package:diana/src/http/interfaces.dart';
 
 class FileParser {
   static Future<dynamic> parseFileParameter(
-    Request request,
+    DianaRequest request,
     Parameter param,
   ) async {
     final contentType =
-        request.headers['content-type'] ?? 'application/octet-stream';
+        request.header('content-type') ?? 'application/octet-stream';
     final contentTypeHandler = ContentTypeRegistry.getContentTypeHandler(
       contentType,
     );
@@ -25,9 +24,8 @@ class FileParser {
       throw Exception('Parameter type must be FileData for file parsing');
     }
 
-    final DianaRequest dianaRequest = DianaRequest.fromShelf(request);
     final bodyObject = await (contentTypeHandler as Deserializable).deserialize(
-      dianaRequest,
+      request,
       FileData,
     );
 

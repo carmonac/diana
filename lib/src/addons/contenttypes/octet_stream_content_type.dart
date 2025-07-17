@@ -3,14 +3,14 @@ import 'dart:typed_data';
 import 'package:diana/diana.dart';
 
 @ContentTypeSerializer(['application/octet-stream'])
-class OctetStreamContentType extends ContentType
+class OctetStreamContentType extends AbstractContentType
     with Deserializable, Serializable {
   OctetStreamContentType(super.contentTypes);
 
   @override
   Future<dynamic> deserialize(DianaRequest request, Type type) async {
     final bytesBuilder = BytesBuilder(copy: false);
-    await for (final chunk in request.read()) {
+    await for (final chunk in request.readAsStream()) {
       bytesBuilder.add(chunk);
     }
 

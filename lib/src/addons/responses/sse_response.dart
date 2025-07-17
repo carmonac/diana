@@ -2,6 +2,7 @@ import 'package:diana/diana.dart';
 
 class SseResponse {
   /// Creates a SSE response with the given [stream].
+  /// Uses the globally configured response factory.
   static DianaResponse send(
     Stream<String> stream, {
     int statusCode = 200,
@@ -13,6 +14,11 @@ class SseResponse {
       'connection': 'keep-alive',
       ...?headers,
     };
-    return DianaResponse(statusCode, body: stream, headers: responseHeaders);
+
+    return ResponseFactoryRegistry.factory.create(
+      statusCode: statusCode,
+      body: stream,
+      headers: responseHeaders,
+    );
   }
 }

@@ -1,7 +1,6 @@
 enum ParameterType {
   path,
   query,
-  queryList,
   body,
   header,
   cookie,

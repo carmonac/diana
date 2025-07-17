@@ -1,7 +1,6 @@
-import '../../adapter/request.dart';
-import '../../adapter/response.dart';
+import '../../http/interfaces.dart';
 
-abstract class DianaErrorHandler {
+abstract class AbstractErrorHandler {
   /// Handles errors that occur during the request processing.
   ///
   /// This method is called when an error is thrown in the request processing pipeline.
